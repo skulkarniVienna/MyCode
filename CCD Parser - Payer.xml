@@ -1,9 +1,9 @@
 <channel version="3.12.0">
-  <id>abf8a28b-b96e-439d-ae18-e79e27a26915</id>
+  <id>264cf267-3368-4571-87d8-c0562c3a6912</id>
   <nextMetaDataId>2</nextMetaDataId>
-  <name>CCD Parser - Vitals</name>
+  <name>CCD Parser - Payer</name>
   <description></description>
-  <revision>11</revision>
+  <revision>5</revision>
   <sourceConnector version="3.12.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
@@ -30,156 +30,74 @@
           <name>Vital</name>
           <sequenceNumber>0</sequenceNumber>
           <enabled>true</enabled>
-          <script>var vitalSection = sourceMap.get(&apos;vitalSection&apos;);
-var _vitalText = sourceMap.get(&apos;vitalText&apos;);
-
+          <script>var _section = sourceMap.get(&apos;payerSection&apos;);
+var _payerText=sourceMap.get(&apos;payerSectionText&apos;)
 var section = {};
-if (vitalSection != null) {
-    section.Code = GetCE(vitalSection.getCode());
-    section.Title = GetST(vitalSection.getTitle());
+if(_section != null) {
+	section.Code = GetCE(_section.getCode());
+	section.Title = GetST(_section.getTitle());
+	section.Text = GetStrucDocText(_section.getText());
 
-    var _entries = vitalSection.getEntries();
-    var entries = [];
-    if (_entries != null) {
-        var _entriesSize = _entries.size();
-        var _i = 0;
-        if (_entriesSize &gt; 0) {
-            for (_i = 0; _i &lt; _entriesSize; _i++) {
-                var entry = {};
-                var _entry = _entries.get(_i);
+	var _entries = _section.getEntries();
+	var entries = [];
+	if(_entries != null) {
+		var _entriesSize = _entries.size();
+		var _i = 0;
+		if(_entriesSize &gt; 0) {
+			for(_i = 0;_i &lt; _entriesSize ; _i++) {
+			var entry = {};
+			var _entry = _entries.get(_i);
 
-                if (_entry != null) {
-                    var organizer = {};
-                    var _organizer = _entry.getOrganizer();
-                    if (_organizer != null) {
-                        organizer.Ids = GetIIList(_organizer.getIds());
-                        organizer.Code = GetCD(_organizer.getCode());
-                        organizer.EffectiveTime = GetIVL_TS(_organizer.getEffectiveTime());
-                        organizer.StatusCode = GetCS(_organizer.getStatusCode());
+				if(_entry != null) {
+					var act = {};
+					var _act = _entry.getAct();
+					if(_act != null) {
+						act.Ids = GetIIList(_act.getIds());
+						act.MoodCode = GetVocabInfo(_act.getMoodCode());
+						act.Code = GetCD(_act.getCode());
+						act.Text = GetED(_act.getText());
+						act.EffectiveTime = GetIVL_TS(_act.getEffectiveTime());
+						act.StatusCode = GetCS(_act.getStatusCode());
+						act.PriorityCode = GetCE(_act.getPriorityCode());
+						act.Authors = GetAuthorList(_act.getAuthors());
+						act.Participants = GetParticipant2List(_act.getParticipants());
+						act.Performers = GetPerformer2List(_act.getPerformers());
+						
+						var _entryrelationships = _act.getEntryRelationships();
+						var entryrelationships = [];
+						if(_entryrelationships != null) {
+						var _entryrelationshipsSize = _entryrelationships.size();
+							
+						var _entryRelationshipCount = 0;
+						for(_entryRelationshipCount = 0;_entryRelationshipCount &lt; _entryrelationshipsSize ; _entryRelationshipCount++) {
+							var entryrelationship = {};
+							var _entryrelationship = _entryrelationships.get(_entryRelationshipCount);
+							entryrelationship = PopulateEntityRelationshipswithText(_entryrelationship,_payerText);
+							entryrelationship.TypeCode = GetVocabInfo(_entryrelationship.getTypeCode());
+								entryrelationships.push(entryrelationship);
+									}
+								}
 
-                        var components = [];
-                        var _components = _organizer.getComponents();
-                        if (_components != null) {
-                            var _componentsSize = _components.size();
-                            if (_componentsSize &gt; 1500) {
-                                _componentsSize = 1500;
-                            }
-                            var _compCount = 0;
-                            for (_compCount = 0; _compCount &lt; _componentsSize; _compCount++) {
-                                var component = {};
-                                var _component = _components.get(_compCount);
-                                if (_component != null) {
-                                    var _componentObservation = _component.getObservation();
-                                    if (_componentObservation != null) {
-                                        var componentObservation = {};
-                                        componentObservation.Ids = GetIIList(_componentObservation.getIds());
-                                        componentObservation.Code = GetCD(_componentObservation.getCode());
-                                        componentObservation.InterpretationCode = GetCEList(_componentObservation.getInterpretationCodes());
-                                        componentObservation.Authors = GetAuthorList(_componentObservation.getAuthors());
-                                        componentObservation.Values = GetAnyList(_componentObservation.getValues());
-                                        componentObservation.StatusCode = GetCS(_componentObservation.getStatusCode());
-                                        componentObservation.EffectiveTime = GetIVL_TS(_componentObservation.getEffectiveTime());
-                                        componentObservation.RefrenceRanges = GetReferenceRangeList(_componentObservation.getReferenceRanges());
-                                        componentObservation.Informants = GetInformant12List(_componentObservation.getInformants());
-
-                                        var _componentObservationentryrelationships = _componentObservation.getEntryRelationships();
-                                        var ComponentObservationentryrelationships = [];
-
-                                        if (_componentObservationentryrelationships != null) 
-                                        {
-                                            var _componentObservationentryrelationshipsSize = _componentObservationentryrelationships.size();
-                                            var _componentObservationentryrelationshipsCount = 0;
-                                            for (_componentObservationentryrelationshipsCount = 0; _componentObservationentryrelationshipsCount &lt; _componentObservationentryrelationshipsSize; _componentObservationentryrelationshipsCount++) 
-                                            {
-                                                var ComponentObservationentryrelationship = {};
-                                                var _componentObservationentryrelationship = _componentObservationentryrelationships.get(_componentObservationentryrelationshipsCount);
-                                                var _componentObservationentryrelationshipObservation = _componentObservationentryrelationship.getObservation();
-                                                if (_componentObservationentryrelationshipObservation != null) {
-                                                    var ComponentObservationentryrelationshipObservation = {};
-                                                    ComponentObservationentryrelationshipObservation.Ids = GetIIList(_componentObservationentryrelationshipObservation.getIds());
-                                                    ComponentObservationentryrelationshipObservation.Values = GetAnyList(_componentObservationentryrelationshipObservation.getValues());
-                                                    ComponentObservationentryrelationshipObservation.Authors = GetAuthorList(_componentObservationentryrelationshipObservation.getAuthors());
-                                                    ComponentObservationentryrelationshipObservation.Code = GetCD(_componentObservationentryrelationshipObservation.getCode());
-                                                    ComponentObservationentryrelationshipObservation.EffectiveTime = GetIVL_TS(_componentObservationentryrelationshipObservation.getEffectiveTime());
-                                                    ComponentObservationentryrelationshipObservation.ClassCode = GetVocabInfo(_componentObservationentryrelationshipObservation.getClassCode());
-                                                    ComponentObservationentryrelationshipObservation.MoodCode = GetVocabInfo(_componentObservationentryrelationshipObservation.getMoodCode());
-
-                                                    // Start
-                                                    var _componentObservationentryrelationshipObservationentryrelationships = _componentObservationentryrelationshipObservation.getEntryRelationships();
-                                                    var ComponentObservationentryrelationshipObservationentryrelationships = [];
-
-                                                    if (_componentObservationentryrelationshipObservationentryrelationships != null) {
-                                                        var _componentObservationentryrelationshipObservationentryrelationshipsSize = _componentObservationentryrelationshipObservationentryrelationships.size();
-                                                        var _count = 0;
-                                                        for (_count = 0; _count &lt; _componentObservationentryrelationshipObservationentryrelationshipsSize; _count++) {
-                                                            var ComponentObservationentryrelationshipObservationentryrelationship = {};
-                                                            var _componentObservationentryrelationshipObservationentryrelationship = _componentObservationentryrelationshipObservationentryrelationships.get(_count);
-                                                            var _componentObservationentryrelationshipObservationentryrelationshipObservation = _componentObservationentryrelationshipObservationentryrelationship.getObservation();
-                                                            if (_componentObservationentryrelationshipObservationentryrelationshipObservation != null) {
-                                                                var ComponentObservationentryrelationshipObservationentryrelationshipObservation = {};
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.Ids = GetIIList(_componentObservationentryrelationshipObservationentryrelationshipObservation.getIds());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.Values = GetAnyList(_componentObservationentryrelationshipObservationentryrelationshipObservation.getValues());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.Authors = GetAuthorList(_componentObservationentryrelationshipObservationentryrelationshipObservation.getAuthors());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.Code = GetCD(_componentObservationentryrelationshipObservationentryrelationshipObservation.getCode());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.EffectiveTime = GetIVL_TS(_componentObservationentryrelationshipObservationentryrelationshipObservation.getEffectiveTime());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.ClassCode = GetVocabInfo(_componentObservationentryrelationshipObservationentryrelationshipObservation.getClassCode());
-                                                                ComponentObservationentryrelationshipObservationentryrelationshipObservation.MoodCode = GetVocabInfo(_componentObservationentryrelationshipObservationentryrelationshipObservation.getMoodCode());
-
-                                                                ComponentObservationentryrelationshipObservationentryrelationship.Observation = ComponentObservationentryrelationshipObservationentryrelationshipObservation;
-                                                            }
-                                                            ComponentObservationentryrelationshipObservationentryrelationship.TypeCode = GetVocabInfo(_componentObservationentryrelationshipObservationentryrelationships.getTypeCode());
-                                                            ComponentObservationentryrelationshipObservationentryrelationships.push(ComponentObservationentryrelationshipObservationentryrelationship);
-                                                        }
-                                                    }
-                                                    //End
-                                                    ComponentObservationentryrelationshipObservation.EntryRelationships = ComponentObservationentryrelationshipObservationentryrelationships;
-                                                    ComponentObservationentryrelationship.Observation = ComponentObservationentryrelationshipObservation;
-                                                }
-
-                                                var _componentObservationentryrelationshipEncounter = _componentObservationentryrelationship.getEncounter();
-                                                
-                                                if (_componentObservationentryrelationshipEncounter != null)
-                                                {
-                                                    var ComponentObservationentryrelationshipEncounter = {};
-                                                    ComponentObservationentryrelationshipEncounter.MoodCode = GetVocabInfo(_componentObservationentryrelationshipEncounter.getMoodCode());
-                                                    ComponentObservationentryrelationshipEncounter.Ids = GetIIList(_componentObservationentryrelationshipEncounter.getIds());
-                                                    ComponentObservationentryrelationshipEncounter.Code = GetCD(_componentObservationentryrelationshipEncounter.getCode());
-                                                    ComponentObservationentryrelationship.encounter = ComponentObservationentryrelationshipEncounter;
-                                                }
-
-                                                ComponentObservationentryrelationship.TypeCode = GetVocabInfo(_componentObservationentryrelationship.getTypeCode());
-                                                ComponentObservationentryrelationships.push(ComponentObservationentryrelationship);
-                                            }
-                                        }
-
-
-                                        componentObservation.EntryRelationships = ComponentObservationentryrelationships;
-                                        component.Observation = componentObservation;
-                                    }
-                                }
-                                components.push(component);
-                            }
-                        }
-                        organizer.Components = components;
-                    }
-                    entry.Organizer = organizer;
-                }
-                entries.push(entry);
-            }
-        }
-    }
-
-    section.Entries = entries;
-    section.ClassCode = GetVocabInfo(vitalSection.getClassCode());
-    section.MoodCode = GetVocabInfo(vitalSection.getMoodCode());
+								act.EntryRelationships = entryrelationships;
+					}
+					entry.Act = act;
+				}
+			entries.push(entry);
+			}	
+		} 
+	}
+	section.Entries = entries;
+	
+	section.ClassCode=GetVocabInfo(_section.getClassCode());
+	section.MoodCode=GetVocabInfo(_section.getMoodCode());
 }
 
-channelMap.put(&apos;Vitalsection&apos;, JSON.stringify(section));</script>
+channelMap.put(&apos;Payer_Section&apos;,JSON.stringify(section));</script>
         </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
         <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.12.0">
           <name>Map PatientId</name>
           <sequenceNumber>1</sequenceNumber>
-          <enabled>true</enabled>
+          <enabled>false</enabled>
           <script>channelMap.put(&apos;patientid&apos;,sourceMap.get(&apos;patientid&apos;));</script>
         </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
       </elements>
@@ -249,9 +167,14 @@ channelMap.put(&apos;Vitalsection&apos;, JSON.stringify(section));</script>
           <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.12.0">
             <sequenceNumber>0</sequenceNumber>
             <enabled>true</enabled>
-            <script>var vitaljson={};
-vitaljson.request=VitalBundle($(&apos;Vitalsection&apos;),sourceMap.get(&apos;vitalText&apos;),$(&apos;patientid&apos;),sourceMap.get(&apos;bundleid&apos;));
-channelMap.put(&apos;vitaljson&apos;,vitaljson);</script>
+            <script>var paylen=$(&apos;Payer_Section&apos;).length();
+if(paylen&gt;2)
+{
+var payorjson={};
+payorjson.request=PayorBundle($(&apos;Payer_Section&apos;),sourceMap.get(&apos;payerSectionText&apos;),$(&apos;patientid&apos;),sourceMap.get(&apos;bundleid&apos;));
+channelMap.put(&apos;payorjson&apos;,payorjson);
+
+}</script>
           </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
         </elements>
         <inboundTemplate encoding="base64"></inboundTemplate>
@@ -364,7 +287,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1668443466493</time>
+        <time>1668443500756</time>
         <timezone>Asia/Calcutta</timezone>
       </lastModified>
       <pruningSettings>
