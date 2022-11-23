@@ -3,7 +3,7 @@
   <nextMetaDataId>2</nextMetaDataId>
   <name>Composition Builder</name>
   <description></description>
-  <revision>68</revision>
+  <revision>75</revision>
   <sourceConnector version="3.12.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
@@ -75,9 +75,13 @@ WHERE requestinfo.status=0</select>
           <sequenceNumber>0</sequenceNumber>
           <enabled>true</enabled>
           <script>importPackage(org.hl7.fhir.r4.model);
+importPackage(Packages.ca.uhn.fhir.parser);
 var bundle = new org.hl7.fhir.r4.model.Bundle();
 var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
 var parser = ctx.newJsonParser();  
+var errorHandler = new LenientErrorHandler();
+errorHandler.setErrorOnInvalidValue(false);
+parser.setParserErrorHandler(errorHandler);
 
 var entrylist=[];
 bundle.setId(msg[&apos;bundleid&apos;].toString());
@@ -491,7 +495,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1668444455880</time>
+        <time>1669221456430</time>
         <timezone>Asia/Calcutta</timezone>
       </lastModified>
       <pruningSettings>
@@ -503,21 +507,28 @@ return;</undeployScript>
       <codeTemplateLibrary version="3.12.0">
         <id>37a60ffd-4008-4cda-b60f-31f4d20ba4ff</id>
         <name>HAPI FHIR Library</name>
-        <revision>121</revision>
+        <revision>128</revision>
         <lastModified>
-          <time>1668525744276</time>
+          <time>1669130240293</time>
           <timezone>Asia/Calcutta</timezone>
         </lastModified>
         <description></description>
         <includeNewChannels>false</includeNewChannels>
         <enabledChannelIds>
+          <string>268c87ee-b6cc-435b-a498-3484197be2ca</string>
+          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
+          <string>efd79df6-4275-42e1-b342-4c186eb0dccc</string>
+          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>cdc68cb2-21f4-447e-b7b9-a0d120a91aed</string>
           <string>40a447a8-89f7-494c-b224-5880c7e86c73</string>
           <string>aba9f80e-e0c2-4b14-b365-9f5f416d51e5</string>
           <string>6485566a-e026-44c1-98cf-f7c62a948022</string>
           <string>617546b5-34e3-4e61-9b1d-5c40909c3787</string>
+          <string>92472400-a82a-4805-b3fe-f92b5980aa2f</string>
+          <string>b9b54c9b-eda4-43c9-8109-fa41bd6cc8fb</string>
           <string>601011b3-f0e9-4bbc-9cf4-dfa658c79e09</string>
-          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
-          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>dd76bbd8-85b9-4718-b8e2-bdcbb018a611</string>
+          <string>8199c8b2-befa-4924-a390-526c4f3b1d31</string>
         </enabledChannelIds>
         <disabledChannelIds>
           <string>41380607-1411-4b46-a8a7-460267132a58</string>
@@ -543,11 +554,11 @@ return;</undeployScript>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -640,11 +651,11 @@ function AddAddressNode(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -732,11 +743,11 @@ function AddNameNode(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -781,18 +792,18 @@ function AddTelecomNode(arg1)
           <codeTemplate version="3.12.0">
             <id>67c523b9-0abc-403a-895c-468958c193a2</id>
             <name>AdvanceDirectiveBundle</name>
-            <revision>7</revision>
+            <revision>9</revision>
             <lastModified>
-              <time>1668223378641</time>
+              <time>1669212304921</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -851,30 +862,30 @@ function AdvanceDirectiveBundle(arg1,text,patientid,bundleid)
           <codeTemplate version="3.12.0">
             <id>702d8f66-3f9b-4067-9807-6fafc170c0e1</id>
             <name>AdvanceDirectiveObservationResource</name>
-            <revision>17</revision>
+            <revision>18</revision>
             <lastModified>
-              <time>1668243196601</time>
+              <time>1668944442361</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
               <type>FUNCTION</type>
               <code>function AdvanceDirectiveObservationResource(arg1,txt,patientid)
 {
-	importPackage(org.hl7.fhir.r4.model);
+    importPackage(org.hl7.fhir.r4.model);
     var observation = new org.hl7.fhir.r4.model.Observation();
     var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
     var parser = ctx.newJsonParser();  
    
-   	for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
     {
         if(arg1.Ids[_id].Extension!=&apos;&apos;)
         {
@@ -889,53 +900,68 @@ function AdvanceDirectiveBundle(arg1,text,patientid,bundleid)
 
     observation.setStatus(Observation.ObservationStatus.FINAL);
     observation.addCategory(new CodeableConcept(new Coding().setCode(&apos;42348-3&apos;).setDisplay(&apos;Advance Directives&apos;).setSystem(&apos;http://terminology.hl7.org/CodeSystem/observation-category&apos;)));
-	
-	observation.setCode(CodeableConcept(GetCoding(arg1.Code)));
-	observation.setSubject(new Reference().setReference(patientid));    
+    
+    observation.setCode(CodeableConcept(GetCoding(arg1.Code)));
+    observation.setSubject(new Reference().setReference(patientid));    
 
-	var tempdate=GetEffectiveTimeInfo(arg1);
-	if(tempdate.startdatetime!=&apos;&apos;)
+    var tempdate=GetEffectiveTimeInfo(arg1);
+    if(tempdate.startdatetime!=&apos;&apos;)
     {
         observation.setEffective(new DateTimeType(formatdate(tempdate.startdatetime)));
     }
 
-	var observedvalue=GetMergedCodeList(arg1.Values[0].CD);
-	if(observedvalue.length&gt;0)
-	{
-		observation.setValue(CodeableConcept(GetCoding(observedvalue[0])));
-	}
+    var observedvalue=GetMergedCodeList(arg1.Values[0].CD);
+    if(observedvalue.length&gt;0)
+    {
+        observation.setValue(CodeableConcept(GetCoding(observedvalue[0])));
+    }
 
 
-	for(var _p=0;_p&lt;arg1.Participants.length&gt;0;_p++)
-	{
-		var participant=arg1.Participants[_p];
-		if(participant.TypeCode.Name==&apos;VRF&apos;)
-		{
-			var authenticator=&apos;#&apos;+new Resource(ParticipanttoPractictioner(participant.ParticipantRole).getId());
-			observation.addContained(ParticipanttoPractictioner(participant.ParticipantRole));    
-		}
+    for(var _p=0;_p&lt;arg1.Participants.length&gt;0;_p++)
+    {
+        var participant=arg1.Participants[_p];
+        if(participant.TypeCode.Name==&apos;VRF&apos;)
+        {
+            var tempparticipant=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempparticipant!=undefined)
+            {
+                var authenticator=&apos;#&apos;+new Resource(tempparticipant.getId());
+                observation.addContained(tempparticipant);        
+            }
+            
+        }
 
-		if(participant.TypeCode.Name==&apos;CST&apos;)
-		{
-			var custodian=&apos;#&apos;+new Resource(ParticipanttoPractictioner(participant.ParticipantRole).getId());
-			observation.addContained(ParticipanttoPractictioner(participant.ParticipantRole));    
-		}
-	}
+        if(participant.TypeCode.Name==&apos;CST&apos;)
+        {
+            var tempcustodian=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempcustodian!=undefined)
+            {
+                var custodian=&apos;#&apos;+new Resource(tempcustodian.getId());
+                observation.addContained(tempcustodian);        
+            }
+            
+        }
+    }
 
-	for(var _r=0;_r&lt;arg1.References.length;_r++)
-	{
-		var tempreference=arg1.References[_r];
-		
-		observation.addDerivedFrom(new Reference().setReference(&apos;#&apos;+new Resource(ExternalDocumentReference(tempreference,patientid,authenticator,custodian).getId())));
-		observation.addContained(ExternalDocumentReference(tempreference,patientid,authenticator,custodian));    
-	}	
+    for(var _r=0;_r&lt;arg1.References.length;_r++)
+    {
+        var tempreference=arg1.References[_r];
+        
+        var tempdocument=ExternalDocumentReference(tempreference,patientid,authenticator,custodian);
+        if(tempdocument!=undefined)
+        {
+            observation.addDerivedFrom(new Reference().setReference(&apos;#&apos;+new Resource(tempdocument.getId())));
+            observation.addContained(tempdocument);    
+        }
+        
+    }   
 
-	observation.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(observation))));
+    observation.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(observation))));
     //var oObservation=JSON.parse(parser.encodeResourceToString(observation));
     //logger.info(&apos;EncounterResource-&gt;&apos;+parser.encodeResourceToString(encounter));
 
     return observation;
-	
+    
 
 }</code>
             </properties>
@@ -943,18 +969,18 @@ function AdvanceDirectiveBundle(arg1,text,patientid,bundleid)
           <codeTemplate version="3.12.0">
             <id>92eda919-b1d6-4b1f-b76b-e83c1c464337</id>
             <name>AllergyIntoleranceBundle</name>
-            <revision>11</revision>
+            <revision>13</revision>
             <lastModified>
-              <time>1668223400032</time>
+              <time>1669212305684</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1009,18 +1035,18 @@ function AllergyIntoleranceBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>aac72619-a521-42c0-9736-19d2aaecf551</id>
             <name>AllergyIntoleranceResource</name>
-            <revision>62</revision>
+            <revision>63</revision>
             <lastModified>
-              <time>1668444252036</time>
+              <time>1668944580059</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1067,21 +1093,24 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
    
    allergyresource.setPatient(new Reference().setReference(patientid));
 
-   if(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor)!= undefined)
+   var recorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+   if(recorder!= undefined)
    {
-      allergyresource.addContained(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor));  
+      allergyresource.addContained(recorder);  
       
-      allergyresource.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor).getId())));
+      allergyresource.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(recorder.getId())));
    }
 
-   if(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor)!= undefined)
+   var recorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor)
+   if(recorderperson!= undefined)
    {
-      allergyresource.addContained(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor));
+      allergyresource.addContained(recorderperson);
    }
 
-   if(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization)!= undefined)
+   var recorderorganization=AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+   if(recorderorganization!= undefined)
    {
-      allergyresource.addContained(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization));
+      allergyresource.addContained(recorderorganization);
    }
    
    
@@ -1233,11 +1262,11 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1298,18 +1327,18 @@ function AuthortoOrganization(arg1)
           <codeTemplate version="3.12.0">
             <id>7ca8e61b-d97b-4301-9203-8b392de4162a</id>
             <name>AuthortoPractictioner</name>
-            <revision>19</revision>
+            <revision>21</revision>
             <lastModified>
-              <time>1666605180129</time>
+              <time>1668953651223</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1325,7 +1354,7 @@ function AuthortoPractictioner(arg1)
 {
    //takes Authors[0].AssignedAuthor node as input
 
-
+	//logger.info(&apos;AuthortoPractictioner-&gt;&apos;+JSON.stringify(arg1))
    importPackage(org.hl7.fhir.r4.model);
     var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
     var parser = ctx.newJsonParser();
@@ -1379,11 +1408,11 @@ function AuthortoPractictioner(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1468,18 +1497,18 @@ function AuthortoPractictionerRole(arg1)
           <codeTemplate version="3.12.0">
             <id>3264fda2-22ab-4f88-89b6-ec48f38a93d2</id>
             <name>CareplanBundle</name>
-            <revision>8</revision>
+            <revision>10</revision>
             <lastModified>
-              <time>1668528031712</time>
+              <time>1669212306376</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1550,11 +1579,11 @@ function CareplanBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1662,18 +1691,18 @@ function CareplanMedicationRequest(arg1,text,patientid)
           <codeTemplate version="3.12.0">
             <id>caf126fc-1371-4852-a025-d87595c7fbc1</id>
             <name>CompositionResource</name>
-            <revision>15</revision>
+            <revision>16</revision>
             <lastModified>
-              <time>1668222853216</time>
+              <time>1668944757672</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1709,10 +1738,11 @@ function CareplanMedicationRequest(arg1,text,patientid)
     }
 
 
-    if(ParticipanttoOrganization(arg1.Custodian.AssignedCustodian.CustodianOrganization)!=undefined)
+    var tempcustodian=ParticipanttoOrganization(arg1.Custodian.AssignedCustodian.CustodianOrganization);
+    if(tempcustodian!=undefined)
     {
-        composition.addContained(ParticipanttoOrganization(arg1.Custodian.AssignedCustodian.CustodianOrganization))
-        composition.setCustodian(new Reference().setReference(&apos;#&apos;+new Resource(ParticipanttoOrganization(arg1.Custodian.AssignedCustodian.CustodianOrganization).getId())))
+        composition.addContained(tempcustodian)
+        composition.setCustodian(new Reference().setReference(&apos;#&apos;+new Resource(tempcustodian.getId())))
     }
 
     if(arg1.DocumentationOfs.length&gt;0)
@@ -1737,20 +1767,23 @@ function CareplanMedicationRequest(arg1,text,patientid)
         var tempauthor=arg1.Authors[_a];
 
         /Author Block Start/
-        if(AuthortoPractictionerRole(tempauthor.AssignedAuthor)!= undefined)
+        var tauthor=AuthortoPractictionerRole(tempauthor.AssignedAuthor);
+        if(tauthor!= undefined)
         {
-            composition.addContained(AuthortoPractictionerRole(tempauthor.AssignedAuthor));    
-            composition.addAuthor(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(tempauthor.AssignedAuthor).getId())));
+            composition.addContained(tauthor);    
+            composition.addAuthor(new Reference().setReference(&apos;#&apos;+new Resource(tauthor.getId())));
         }
 
-        if(AuthortoPractictioner(tempauthor.AssignedAuthor)!= undefined)
+        var tauthorperson=AuthortoPractictioner(tempauthor.AssignedAuthor);
+        if(tauthorperson!= undefined)
         {
-            composition.addContained(AuthortoPractictioner(tempauthor.AssignedAuthor));
+            composition.addContained(tauthorperson);
         }
-                    
-        if(AuthortoOrganization(tempauthor.AssignedAuthor.Organization)!= undefined)
+                 
+        var tauthorg=AuthortoOrganization(tempauthor.AssignedAuthor.Organization);
+        if(tauthorg!= undefined)
         {
-            composition.addContained(AuthortoOrganization(tempauthor.AssignedAuthor.Organization));
+            composition.addContained(tauthorg);
         }
 
         /Author Block End/
@@ -1761,7 +1794,7 @@ function CareplanMedicationRequest(arg1,text,patientid)
 
     //SavefhirResource(parser.encodeResourceToString(composition),composition.getId(),&apos;Composition&apos;,bundleId,null);
     SavefhirResource(composition,bundleId,null);
-	
+    
     return oComposition;
     
 }</code>
@@ -1770,18 +1803,18 @@ function CareplanMedicationRequest(arg1,text,patientid)
           <codeTemplate version="3.12.0">
             <id>24abdd23-9a53-4905-a7be-a2969904ff83</id>
             <name>ConditionBundle</name>
-            <revision>2</revision>
+            <revision>4</revision>
             <lastModified>
-              <time>1668223487151</time>
+              <time>1669212307599</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -1829,152 +1862,155 @@ function ConditionBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>d0b0f04e-5478-4e70-988b-00e67434834a</id>
             <name>ConditionResource</name>
-            <revision>32</revision>
+            <revision>33</revision>
             <lastModified>
-              <time>1668243265340</time>
+              <time>1668944873588</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
               <type>FUNCTION</type>
               <code>/**
-	Modify the description here. Modify the function name and parameters as needed. One function per
-	template is recommended; create a new code template for each new function.
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
 
-	@param {String} arg1 - arg1 description
-	@return {String} return description
+    @param {String} arg1 - arg1 description
+    @return {String} return description
 */
 function ConditionResource(arg1,txt,patientid) 
 {
-	importPackage(org.hl7.fhir.r4.model);
+    importPackage(org.hl7.fhir.r4.model);
     var condition = new org.hl7.fhir.r4.model.Condition();
     var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
     var parser = ctx.newJsonParser();  
-	
+    
 
     if(arg1.hasOwnProperty(&apos;Informants&apos;))
     {
-    	if(arg1.Informants.length&gt;0)
-	    {
-	    	if(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity)!= undefined)
-		    {
-		        condition.addContained(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity));    
-		        condition.setAsserter(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity).getId())));
-		    }
+        if(arg1.Informants.length&gt;0)
+        {
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                condition.addContained(tempasserter);    
+                condition.setAsserter(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+            }
 
-			if(AuthortoPractictioner(arg1.Informants[0].AssignedEntity)!= undefined)
-			{
-				condition.addContained(AuthortoPractictioner(arg1.Informants[0].AssignedEntity));
-			}
-		            
-			if(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0])!= undefined)
-			{
-		        condition.addContained(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]));
-		    }	
-	    }
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[0].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                condition.addContained(tempasserterperson);
+            }
+                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                condition.addContained(tempasserterorg);
+            }   
+        }
 
     }
     
-	
-	
-
-	//looping through Entry Relationships
-	for(_per=0;_per&lt;arg1.EntryRelationships.length;_per++)
-	{
-		var temp_er=arg1.EntryRelationships[_per];
-		
-		if(temp_er.TypeCode.Name==&apos;SUBJ&apos; &amp;&amp; temp_er.hasOwnProperty(&apos;Observation&apos;))
-		{
-			for(var _id=0;_id&lt;temp_er.Observation.Ids.length;_id++)
-	    	{
-	        	if(temp_er.Observation.Ids[_id].Extension!=&apos;&apos;)
-	        	{
-	            	condition.addIdentifier().setSystem(GetSystem(temp_er.Observation.Ids[_id].Root)).setValue(temp_er.Observation.Ids[_id].Extension);   
-	        	}
-	        
-	    	}
-			
-		if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
-    		{
-            	condition.setText(GetNarrative(txt))
-        	}
-
-        	condition.setSubject(new Reference().setReference(patientid));		
-		    
-		    var conditioncategory=GetMergedCodeList(temp_er.Observation.Code);
-		  
-		    for(var _cat=0;_cat&lt;conditioncategory.length;_cat++)
-		    {
-		    	condition.addCategory(CodeableConcept(GetCoding(conditioncategory[_cat])));
-		    } 
-		    
-		    var encdate=GetEffectiveTimeInfo(temp_er.Observation);
     
-    		if(encdate.startdatetime!=&apos;&apos;)
-    		{
-        		condition.setOnset(new DateTimeType(formatdate(encdate.startdatetime)));
-    		}
+    
 
-    		if(encdate.enddatetime!=&apos;&apos;)
-    		{
-        		condition.setAbatement(new DateTimeType(formatdate(encdate.enddatetime)));
-    		}        
-		
-			var conditioncode=GetMergedCodeList(temp_er.Observation.Values[0].CD);
-			//logger.info(&apos;ConditionResource:conditioncode-&gt;&apos;+GetMergedCodeList(temp_er.Observation.Values[0].CD))
-			if(conditioncode.length&gt;0)
-			{
-				condition.setCode(CodeableConcept(GetCoding(conditioncode[0])));
-			}
+    //looping through Entry Relationships
+    for(_per=0;_per&lt;arg1.EntryRelationships.length;_per++)
+    {
+        var temp_er=arg1.EntryRelationships[_per];
+        
+        if(temp_er.TypeCode.Name==&apos;SUBJ&apos; &amp;&amp; temp_er.hasOwnProperty(&apos;Observation&apos;))
+        {
+            for(var _id=0;_id&lt;temp_er.Observation.Ids.length;_id++)
+            {
+                if(temp_er.Observation.Ids[_id].Extension!=&apos;&apos;)
+                {
+                    condition.addIdentifier().setSystem(GetSystem(temp_er.Observation.Ids[_id].Root)).setValue(temp_er.Observation.Ids[_id].Extension);   
+                }
+            
+            }
+            
+        if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+            {
+                condition.setText(GetNarrative(txt))
+            }
 
-	        //loop for Entryrelationship within observation
-		    for(var _o_er=0;_o_er&lt;temp_er.Observation.EntryRelationships.length&gt;0;_o_er++)
-		    {
-		    	var temp_er_er=temp_er.Observation.EntryRelationships[_o_er];
+            condition.setSubject(new Reference().setReference(patientid));      
+            
+            var conditioncategory=GetMergedCodeList(temp_er.Observation.Code);
+          
+            for(var _cat=0;_cat&lt;conditioncategory.length;_cat++)
+            {
+                condition.addCategory(CodeableConcept(GetCoding(conditioncategory[_cat])));
+            } 
+            
+            var encdate=GetEffectiveTimeInfo(temp_er.Observation);
+    
+            if(encdate.startdatetime!=&apos;&apos;)
+            {
+                condition.setOnset(new DateTimeType(formatdate(encdate.startdatetime)));
+            }
 
-		    	if(temp_er_er.hasOwnProperty(&apos;Observation&apos;))
-		    	{
-		    		//start of clinicalstatus
-		    		if(temp_er_er.Observation.Code.Code==&apos;33999-4&apos;)
-		            {
-		            	condition.setClinicalStatus(CodeableConcept(GetCoding(temp_er_er.Observation.Values[0].CD)));
-				  }//end of clinicalstatus
-		
-		
-		            // age at onset
-		            if(temp_er_er.Observation.Code.Code==&apos;445518008&apos; || temp_er_er.Observation.Code.Code==&apos;397659008&apos;)
-		            {
-		            	if(temp_er_er.Observation.Values[0].PQ.Value!=&apos;&apos;  &amp;&amp; encdate.startdatetime==&apos;&apos;)
-		            	{
-		            		condition.setOnset(new Age().setValue(temp_er_er.Observation.Values[0].PQ.Value).setCode(temp_er_er.Observation.Values[0].PQ.Unit));	
-		            	}
-		                
-		            }// end of OnsetAge
-		
+            if(encdate.enddatetime!=&apos;&apos;)
+            {
+                condition.setAbatement(new DateTimeType(formatdate(encdate.enddatetime)));
+            }        
+        
+            var conditioncode=GetMergedCodeList(temp_er.Observation.Values[0].CD);
+            //logger.info(&apos;ConditionResource:conditioncode-&gt;&apos;+GetMergedCodeList(temp_er.Observation.Values[0].CD))
+            if(conditioncode.length&gt;0)
+            {
+                condition.setCode(CodeableConcept(GetCoding(conditioncode[0])));
+            }
 
-					if(temp_er_er.Observation.Code.Code==&apos;225773000&apos;)
-		            {
-		            	//start of severity
-						var severitylist=GetMergedCodeList(temp_er_er.Observation.Values[0].CD);
-						for(var _s=0;_s&lt;severitylist.length;_s++)
-						{
-							condition.setSeverity(CodeableConcept(GetCoding(severitylist[_s])))
-						}
+            //loop for Entryrelationship within observation
+            for(var _o_er=0;_o_er&lt;temp_er.Observation.EntryRelationships.length&gt;0;_o_er++)
+            {
+                var temp_er_er=temp_er.Observation.EntryRelationships[_o_er];
+
+                if(temp_er_er.hasOwnProperty(&apos;Observation&apos;))
+                {
+                    //start of clinicalstatus
+                    if(temp_er_er.Observation.Code.Code==&apos;33999-4&apos;)
+                    {
+                        condition.setClinicalStatus(CodeableConcept(GetCoding(temp_er_er.Observation.Values[0].CD)));
+                  }//end of clinicalstatus
+        
+        
+                    // age at onset
+                    if(temp_er_er.Observation.Code.Code==&apos;445518008&apos; || temp_er_er.Observation.Code.Code==&apos;397659008&apos;)
+                    {
+                        if(temp_er_er.Observation.Values[0].PQ.Value!=&apos;&apos;  &amp;&amp; encdate.startdatetime==&apos;&apos;)
+                        {
+                            condition.setOnset(new Age().setValue(temp_er_er.Observation.Values[0].PQ.Value).setCode(temp_er_er.Observation.Values[0].PQ.Unit));    
+                        }
+                        
+                    }// end of OnsetAge
+        
+
+                    if(temp_er_er.Observation.Code.Code==&apos;225773000&apos;)
+                    {
+                        //start of severity
+                        var severitylist=GetMergedCodeList(temp_er_er.Observation.Values[0].CD);
+                        for(var _s=0;_s&lt;severitylist.length;_s++)
+                        {
+                            condition.setSeverity(CodeableConcept(GetCoding(severitylist[_s])))
+                        }
                     }//end of severity
-		        }// end of temp_er_er.hasOwnProperty(&apos;Observation&apos;)
-		    }//end of temp_er_er for loop
-		}//end of if loop 
-	}//end of _per
+                }// end of temp_er_er.hasOwnProperty(&apos;Observation&apos;)
+            }//end of temp_er_er for loop
+        }//end of if loop 
+    }//end of _per
 
-	condition.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(condition))));
+    condition.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(condition))));
     //var oCondition=JSON.parse(parser.encodeResourceToString(condition));
     
    // logger.info(&apos;ConditionResource-&gt;&apos;+parser.encodeResourceToString(condition));
@@ -1986,26 +2022,26 @@ function ConditionResource(arg1,txt,patientid)
     //return oCondition;
 }
 
-		
-	
+        
+    
 </code>
             </properties>
           </codeTemplate>
           <codeTemplate version="3.12.0">
             <id>1c07dcff-6262-4cca-88c8-91fa777c48b2</id>
             <name>CoverageResource</name>
-            <revision>38</revision>
+            <revision>45</revision>
             <lastModified>
-              <time>1668424809384</time>
+              <time>1668939894332</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2019,6 +2055,7 @@ function ConditionResource(arg1,txt,patientid)
 */
 function CoverageResource(arg1,text,patientid)
 {
+    
     
     importPackage(org.hl7.fhir.r4.model);
     var coverage = new org.hl7.fhir.r4.model.Coverage();
@@ -2065,19 +2102,21 @@ function CoverageResource(arg1,text,patientid)
 
                 if(tempperformer.AssignedEntity.Code.Code==&apos;PAYOR&apos;)
                 {
-                    if(OrganizationResource(tempperformer.AssignedEntity.Organizations[0])!=undefined)
+                    var payerorg=OrganizationResource(tempperformer.AssignedEntity.Organizations[0]);
+                    if(payerorg!=undefined)
                     {
-                        coverage.addPayor(new Reference().setType(&apos;Organization&apos;).setDisplay(&apos;Payor&apos;).setReference(&apos;#&apos;+new Resource(OrganizationResource(tempperformer.AssignedEntity.Organizations[0]).getId())))
-                        coverage.addContained(OrganizationResource(tempperformer.AssignedEntity.Organizations[0]))
+                        coverage.addPayor(new Reference().setType(&apos;Organization&apos;).setDisplay(&apos;Payor&apos;).setReference(&apos;#&apos;+new Resource(payerorg.getId())))
+                        coverage.addContained(payerorg)
                     }
                 }
 
                 if(tempperformer.AssignedEntity.Code.Code==&apos;GUAR&apos;)
                 {
-                    if(ParticipanttoRelatedPerson(tempperformer.AssignedEntity)!=undefined)
+                    var relatedperson=ParticipanttoRelatedPerson(tempperformer.AssignedEntity);
+                    if(relatedperson!=undefined)
                     {
-                        coverage.addPayor(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Guarantor&apos;).setReference(&apos;#&apos;+new Resource(ParticipanttoRelatedPerson(tempperformer.AssignedEntity).getId())))
-                        coverage.addContained(ParticipanttoRelatedPerson(tempperformer.AssignedEntity))
+                        coverage.addPayor(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Guarantor&apos;).setReference(&apos;#&apos;+new Resource(relatedperson.getId())))
+                        coverage.addContained(relatedperson)
                     }
                 }
                 
@@ -2090,22 +2129,24 @@ function CoverageResource(arg1,text,patientid)
 
                 if(tempparticipant.TypeCode.Name==&apos;HLD&apos;)
                 {
-                    if(ParticipanttoRelatedPerson(tempparticipant.ParticipantRole,patientid)!=undefined)
+                    var relatedperson=ParticipanttoRelatedPerson(tempparticipant.ParticipantRole,patientid)
+                    if(relatedperson!=undefined)
                     {
-                        coverage.addContained(ParticipanttoRelatedPerson(tempparticipant.ParticipantRole,patientid));    
+                        coverage.addContained(relatedperson);    
             
-                        coverage.setPolicyHolder(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Policy Holder&apos;).setReference(&apos;#&apos;+new Resource(ParticipanttoRelatedPerson(tempparticipant.ParticipantRole).getId())));    
+                        coverage.setPolicyHolder(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Policy Holder&apos;).setReference(&apos;#&apos;+new Resource(relatedperson.getId())));    
                     }
                     
                 }
 
                 if(tempparticipant.TypeCode.Name==&apos;COV&apos;)
                 {
-                    if(ParticipanttoPatient(tempparticipant.ParticipantRole)!=undefined)
+                    var subscriber=ParticipanttoPatient(tempparticipant.ParticipantRole)
+                    if(subscriber!=undefined)
                     {
-                        coverage.addContained(ParticipanttoPatient(tempparticipant.ParticipantRole));    
+                        coverage.addContained(subscriber);    
             
-                        coverage.setSubscriber(new Reference().setType(&apos;Patient&apos;).setDisplay(&apos;Insured Person&apos;).setReference(&apos;#&apos;+new Resource(ParticipanttoPatient(tempparticipant.ParticipantRole).getId())));    
+                        coverage.setSubscriber(new Reference().setType(&apos;Patient&apos;).setDisplay(&apos;Insured Person&apos;).setReference(&apos;#&apos;+new Resource(subscriber.getId())));    
                     }
 
                     if(tempparticipant.ParticipantRole.Code.Code!=&apos;&apos; || tempparticipant.ParticipantRole.Code.DisplayName!=&apos;&apos;)
@@ -2172,7 +2213,10 @@ function CoverageResource(arg1,text,patientid)
    
 
 
+    
     return coverage;
+
+
     
 
 }</code>
@@ -2188,11 +2232,11 @@ function CoverageResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2299,18 +2343,18 @@ function DeviceResource(arg1,txt,patientid)
           <codeTemplate version="3.12.0">
             <id>882e0d9b-fd8a-46ad-a4aa-916686cc0763</id>
             <name>EncounterBundle</name>
-            <revision>4</revision>
+            <revision>6</revision>
             <lastModified>
-              <time>1668225118122</time>
+              <time>1669212308324</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2352,18 +2396,18 @@ function DeviceResource(arg1,txt,patientid)
           <codeTemplate version="3.12.0">
             <id>5ff514fe-780e-4d24-a226-e0c5f7aac20a</id>
             <name>EncounterResource</name>
-            <revision>49</revision>
+            <revision>50</revision>
             <lastModified>
-              <time>1668243292647</time>
+              <time>1668945134041</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2420,23 +2464,25 @@ function EncounterResource(arg1,txt,patientid)
                 
             var encounterparticipant=new org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent();
                 
-            
-            if(AuthortoPractictionerRole(tempperformer.AssignedEntity)!= undefined)
+            var tempindividual=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+            if(tempindividual!= undefined)
             {
 
-                encounter.addContained(AuthortoPractictionerRole(tempperformer.AssignedEntity));    
+                encounter.addContained(tempindividual);    
             
-                encounterparticipant.setIndividual(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(tempperformer.AssignedEntity).getId())));
+                encounterparticipant.setIndividual(new Reference().setReference(&apos;#&apos;+new Resource(tempindividual.getId())));
             }
 
-            if(AuthortoPractictioner(tempperformer.AssignedEntity)!= undefined)
+            var tempindividualperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+            if(tempindividualperson!= undefined)
             {
-                encounter.addContained(AuthortoPractictioner(tempperformer.AssignedEntity));
+                encounter.addContained(tempindividualperson);
             }
             
-            if(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0])!= undefined)
+            var tempindividualorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+            if(tempindividualorg!= undefined)
             {
-                encounter.addContained(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]));
+                encounter.addContained(tempindividualorg);
             }
 
             if(tempperformer.TypeCode.Name!=&apos;&apos;)
@@ -2493,9 +2539,16 @@ function EncounterResource(arg1,txt,patientid)
             
                 var tmp_condition=temp_e_er1.Act.EntryRelationships[_a];
                 var encounterdiagnosis=new org.hl7.fhir.r4.model.Encounter.DiagnosisComponent();
-                encounter.addContained(ConditionResource(temp_e_er1.Act,txt,patientid));    
-                encounterdiagnosis.setCondition(new Reference().setReference(&apos;#&apos;+new Resource(ConditionResource(temp_e_er1.Act,txt,patientid).getId())));
-                encounter.addDiagnosis(encounterdiagnosis);
+
+                var tempdiag=ConditionResource(temp_e_er1.Act,txt,patientid);
+                if(tempdiag!=undefined)
+                {
+                    encounter.addContained(tempdiag);    
+                    encounterdiagnosis.setCondition(new Reference().setReference(&apos;#&apos;+new Resource(tempdiag.getId())));
+                    encounter.addDiagnosis(encounterdiagnosis);
+                }
+                
+                
             }
             
         }// end of Act-diagnosis
@@ -2507,10 +2560,13 @@ function EncounterResource(arg1,txt,patientid)
         var temppart=arg1.Participants[_o];
         if(temppart.TypeCode.Name==&apos;LOC&apos;)
         {
-            if(ParticipanttoOrganization(temppart.ParticipantRole)!=undefined)
-            {&#xd;            	encounter.addContained(ParticipanttoOrganization(temppart.ParticipantRole));    
-            	encounter.setServiceProvider(new Reference().setReference(&apos;#&apos;+new Resource(ParticipanttoOrganization(temppart.ParticipantRole).getId())));    	
-            }&#xd;            
+            var tempprovider=ParticipanttoOrganization(temppart.ParticipantRole);
+            if(tempprovider!=undefined)
+            {
+                encounter.addContained(tempprovider);    
+                encounter.setServiceProvider(new Reference().setReference(&apos;#&apos;+new Resource(tempprovider.getId())));      
+            }
+            
         }
         
     }
@@ -2532,18 +2588,18 @@ function EncounterResource(arg1,txt,patientid)
           <codeTemplate version="3.12.0">
             <id>c0ff72c1-df5c-4007-a1c3-fa318bc08155</id>
             <name>ExternalDocumentReference</name>
-            <revision>3</revision>
+            <revision>5</revision>
             <lastModified>
-              <time>1667045454919</time>
+              <time>1669213834374</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2580,20 +2636,38 @@ function ExternalDocumentReference(arg1,patientid,authenticator,custodian)
     documentreference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT)
 
     var documentcomponent=new org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent();
-    if(arg1.ExternalDocument.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+
+    if(arg1.ExternalDocument.Text.Text!=&apos;&apos;)
     {
         var attachment=new org.hl7.fhir.r4.model.Attachment();
-        attachment.setTitle(arg1.ExternalDocument.Text.Reference.TEL_URL.Value);
-
+        attachment.setTitle(arg1.ExternalDocument.Text.Text);
+    
         if(arg1.ExternalDocument.Text.MediaType!=&apos;&apos;)
         {
             attachment.setContentType(arg1.ExternalDocument.Text.MediaType)    
         }    
-
+    
         documentcomponent.setAttachment(attachment);
         documentreference.addContent(documentcomponent)
-
     }
+    else if(arg1.ExternalDocument.Text.Reference.hasOwnProperty(&apos;TEL_URL&apos;))
+    {
+            if(arg1.ExternalDocument.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+        {
+            var attachment=new org.hl7.fhir.r4.model.Attachment();
+            attachment.setTitle(arg1.ExternalDocument.Text.Reference.TEL_URL.Value);
+    
+            if(arg1.ExternalDocument.Text.MediaType!=&apos;&apos;)
+            {
+                attachment.setContentType(arg1.ExternalDocument.Text.MediaType)    
+            }    
+    
+            documentcomponent.setAttachment(attachment);
+            documentreference.addContent(documentcomponent)
+    
+        }
+    }
+    
 
     if(authenticator!=&apos;&apos; &amp;&amp; authenticator!=undefined)
     {
@@ -2622,18 +2696,18 @@ function ExternalDocumentReference(arg1,patientid,authenticator,custodian)
           <codeTemplate version="3.12.0">
             <id>cfce7c21-3f6d-4158-95bc-59c076b803c9</id>
             <name>FamilyMemberHistoryBundle</name>
-            <revision>3</revision>
+            <revision>5</revision>
             <lastModified>
-              <time>1668223590820</time>
+              <time>1669212309013</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2696,11 +2770,11 @@ function FamilyMemberHistoryBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2802,18 +2876,18 @@ function FamilyMemberHistoryResource(arg1,txt,patientid)
           <codeTemplate version="3.12.0">
             <id>240d7479-ebde-49c9-a93b-1921271cae56</id>
             <name>FunctionalStatusBundle</name>
-            <revision>4</revision>
+            <revision>6</revision>
             <lastModified>
-              <time>1668223700868</time>
+              <time>1669212310408</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2878,11 +2952,11 @@ function FunctionalStatusBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -2950,11 +3024,11 @@ function GetCoding(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3029,11 +3103,11 @@ function GetCodingList(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3140,11 +3214,11 @@ function GetMergedCodeList(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3170,18 +3244,18 @@ function GetNarrative(arg1) {
           <codeTemplate version="3.12.0">
             <id>4ae44f57-065a-40e6-9f60-eac670162cc8</id>
             <name>GetPatientResource_hapi</name>
-            <revision>68</revision>
+            <revision>69</revision>
             <lastModified>
-              <time>1668519981817</time>
+              <time>1668945251757</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3262,19 +3336,19 @@ function GetNarrative(arg1) {
                         for (; _k &lt; _patientcontactsSize; _k++) 
                         {
 
-                                	var pcontact=patient.addTelecom()
-                                	if(_patientcontacts[_k].TEL_URL.Value!=&apos;&apos;)
-                                	{
-                             			pcontact.setValue(_patientcontacts[_k].TEL_URL.Value)
-                                	}
-                           		if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
-                           		{
-                                		pcontact.setSystem(ContactPoint.ContactPointSystem.valueOf(MapTelecomSystem(_patientcontacts[_k].TelecomAddress[0].Name)));
-                           		}
-                           		if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
-                           		{
-                                		pcontact.setUse(ContactPoint.ContactPointUse.valueOf(MapTelecomUse(_patientcontacts[_k].TelecomAddress[0].Name)));
-                           		}
+                                    var pcontact=patient.addTelecom()
+                                    if(_patientcontacts[_k].TEL_URL.Value!=&apos;&apos;)
+                                    {
+                                        pcontact.setValue(_patientcontacts[_k].TEL_URL.Value)
+                                    }
+                                if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
+                                {
+                                        pcontact.setSystem(ContactPoint.ContactPointSystem.valueOf(MapTelecomSystem(_patientcontacts[_k].TelecomAddress[0].Name)));
+                                }
+                                if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
+                                {
+                                        pcontact.setUse(ContactPoint.ContactPointUse.valueOf(MapTelecomUse(_patientcontacts[_k].TelecomAddress[0].Name)));
+                                }
                            
                             
 
@@ -3285,7 +3359,7 @@ function GetNarrative(arg1) {
                 var gender=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.AdministrativeGenderCode);
                 if(gender.length&gt;0)
                 {
-                	//logger.info(&apos;PatientResource-&gt;&apos;+gender[0].Code)
+                    //logger.info(&apos;PatientResource-&gt;&apos;+gender[0].Code)
                     patient.setGender(Enumerations.AdministrativeGender.valueOf(MapGender(gender[0].Code))) 
                 }
 
@@ -3300,7 +3374,7 @@ function GetNarrative(arg1) {
                 
     
                 
-    			patient.setAddress(AddAddressNode(_recordTargets[_count].PatientRole.Address))
+                patient.setAddress(AddAddressNode(_recordTargets[_count].PatientRole.Address))
 
                 var maritalstatus=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.MaritalStatusCode);
 
@@ -3414,10 +3488,12 @@ function GetNarrative(arg1) {
 
                 }
 
-                 if(OrganizationResource(_recordTargets[_count].PatientRole.Organization)!=undefined &amp;&amp; OrganizationResource(_recordTargets[_count].PatientRole.Organization)!=null)
+
+                var temporg=OrganizationResource(_recordTargets[_count].PatientRole.Organization);
+                 if(temporg!=undefined &amp;&amp; temporg!=null)
                  {
-                 	patient.setManagingOrganization(new Reference().setReference(&apos;#&apos;+new Resource(OrganizationResource(_recordTargets[_count].PatientRole.Organization).getId())));
-                 	patient.addContained((OrganizationResource(_recordTargets[_count].PatientRole.Organization)));	
+                    patient.setManagingOrganization(new Reference().setReference(&apos;#&apos;+new Resource(temporg.getId())));
+                    patient.addContained(temporg);  
                  }
                  
 
@@ -3452,13 +3528,13 @@ function GetNarrative(arg1) {
                             var languagecomponent= new org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent();
                             languagecomponent.setLanguage(CodeableConcept(patientlanguage));
                             
-						if(_patientLanguageCommunications[_i].hasOwnProperty(&apos;PreferenceInd&apos;))
-						{
-							if(_patientLanguageCommunications[_i].PreferenceInd.Value!=&apos;&apos;)
-		                         {
-		                         	languagecomponent.setPreferredElement(new BooleanType(_patientLanguageCommunications[_i].PreferenceInd.Value));	
-		                         }	
-						}
+                        if(_patientLanguageCommunications[_i].hasOwnProperty(&apos;PreferenceInd&apos;))
+                        {
+                            if(_patientLanguageCommunications[_i].PreferenceInd.Value!=&apos;&apos;)
+                                 {
+                                    languagecomponent.setPreferredElement(new BooleanType(_patientLanguageCommunications[_i].PreferenceInd.Value)); 
+                                 }  
+                        }
                             
                             
                             patient.addCommunication(languagecomponent)
@@ -3590,11 +3666,11 @@ function GetNarrative(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3652,11 +3728,11 @@ function GetQuantity(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3703,11 +3779,11 @@ function GetQuantity(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3747,11 +3823,11 @@ function GetSystem(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3834,18 +3910,18 @@ function GetValueNode(arg1)
           <codeTemplate version="3.12.0">
             <id>02801c95-edca-4aa1-a7ab-cc14ad7cb707</id>
             <name>ImmunizationBundle</name>
-            <revision>5</revision>
+            <revision>7</revision>
             <lastModified>
-              <time>1668251225863</time>
+              <time>1669212311186</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3901,18 +3977,18 @@ function ImmunizationBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>160024f7-3c07-446b-b49e-c682becff8ca</id>
             <name>ImmunizationResource</name>
-            <revision>12</revision>
+            <revision>13</revision>
             <lastModified>
-              <time>1668247059893</time>
+              <time>1668945458223</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -3956,10 +4032,11 @@ function ImmunizationResource(arg1,txt,patientid)
         immunization.setRecordedElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
     }
 
-    if(OrganizationResource(arg1.Consumable.ManufacturedProduct.Organization)!=undefined)
+    var tempmanufacturer=OrganizationResource(arg1.Consumable.ManufacturedProduct.Organization);
+    if(tempmanufacturer!=undefined)
     {
-        immunization.addContained(OrganizationResource(arg1.Consumable.ManufacturedProduct.Organization));
-        immunization.setManufacturer(new Reference(&apos;#&apos;+new Resource(OrganizationResource(arg1.Consumable.ManufacturedProduct.Organization).getId())));    
+        immunization.addContained(tempmanufacturer);
+        immunization.setManufacturer(new Reference(&apos;#&apos;+new Resource(tempmanufacturer.getId())));    
     }
     
 
@@ -3989,20 +4066,24 @@ function ImmunizationResource(arg1,txt,patientid)
         {
             var performer=new org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent();
         
-            if(AuthortoPractictionerRole(arg1.Performers[0].AssignedEntity)!= undefined)
+            var tempactor=AuthortoPractictionerRole(arg1.Performers[0].AssignedEntity);
+            if(tempactor!= undefined)
             {
-                immunization.addContained(AuthortoPractictionerRole(arg1.Performers[0].AssignedEntity));    
-                performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Performers[0].AssignedEntity).getId())));
+                immunization.addContained(tempactor);    
+                performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(tempactor.getId())));
             }
 
-            if(AuthortoPractictioner(arg1.Performers[0].AssignedEntity)!= undefined)
+            var tempactorperson=AuthortoPractictioner(arg1.Performers[0].AssignedEntity);
+            if(tempactorperson!= undefined)
             {
-                immunization.addContained(AuthortoPractictioner(arg1.Performers[0].AssignedEntity));
+                immunization.addContained(tempactorperson);
             }
+
+            var tempactororg=AuthortoOrganization(arg1.Performers[0].AssignedEntity.Organizations[0]);
                 
-            if(AuthortoOrganization(arg1.Performers[0].AssignedEntity.Organizations[0])!= undefined)
+            if(tempactororg!= undefined)
             {
-                immunization.addContained(AuthortoOrganization(arg1.Performers[0].AssignedEntity.Organizations[0]));
+                immunization.addContained(tempactororg);
             }
 
             immunization.addPerformer(performer);
@@ -4047,9 +4128,14 @@ function ImmunizationResource(arg1,txt,patientid)
             if(er1.TypeCode.Name==&apos;CAUS&apos;)
             {
                 var reaction=new org.hl7.fhir.r4.model.Immunization.ImmunizationReactionComponent();
-                reaction.setDetail(new Reference().setReference(&apos;#&apos;+new Resource(ObservationResource(er1.Observation).getId())))
-                immunization.addContained(ObservationResource(er1.Observation));
-                immunization.addReaction(reaction)
+                var tempreaction=ObservationResource(er1.Observation);
+                if(tempreaction!=undefined)
+                {
+                    reaction.setDetail(new Reference().setReference(&apos;#&apos;+new Resource(tempreaction.getId())))
+                    immunization.addContained(tempreaction);
+                    immunization.addReaction(reaction)    
+                }
+                
             }
         }
 
@@ -4088,11 +4174,11 @@ function ImmunizationResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4152,18 +4238,18 @@ function LocationResource(arg1)
           <codeTemplate version="3.12.0">
             <id>401bbcac-caaa-43e6-92b8-a8c1ffb50e38</id>
             <name>MapAddressUse</name>
-            <revision>6</revision>
+            <revision>7</revision>
             <lastModified>
-              <time>1666804865528</time>
+              <time>1669221619984</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4204,7 +4290,7 @@ function LocationResource(arg1)
             return &apos;WORK&apos;
             break;
          default:
-         	  return null
+         	  return &apos;NULL&apos;
        
     }
 
@@ -4221,11 +4307,11 @@ function LocationResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4274,11 +4360,11 @@ function MapAllergyClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4318,18 +4404,18 @@ function MapAllergyCriticality(str)
           <codeTemplate version="3.12.0">
             <id>75ced236-950b-4d92-9e7d-1619f019d654</id>
             <name>MapAllergySeverity</name>
-            <revision>6</revision>
+            <revision>12</revision>
             <lastModified>
-              <time>1666865560936</time>
+              <time>1669218363650</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4351,17 +4437,17 @@ function MapAllergyCriticality(str)
 function MapAllergySeverity(str)
 {
     var Code;
-    //logger.info(&apos;MapAllergySeverity&apos;+str)
+    //logger.info(&apos;MapAllergySeverity&apos;+JSON.stringify(str))
 
     if(str.Code==&apos;24484000&apos; || str.Code==&apos;SV&apos;)
     {
         Code=&apos;SEVERE&apos;
     }
-    else if(str.Code==&apos;255604002&apos;)
+    else if(str.Code==&apos;255604002&apos; || str.Code==&apos;MI&apos;)
     {
        Code=&apos;MILD&apos;
     }
-    else if(str.Code==&apos;6736007&apos;)
+    else if(str.Code==&apos;6736007&apos; || str.Code==&apos;MO&apos;)
     {
        Code=&apos;MODERATE&apos;
     }
@@ -4371,7 +4457,7 @@ function MapAllergySeverity(str)
     }
     else
     {
-        Code=null
+        Code=&apos;NULL&apos;
     }
 
     return Code;
@@ -4388,11 +4474,11 @@ function MapAllergySeverity(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4464,11 +4550,11 @@ function MapAllergyType(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4514,11 +4600,11 @@ function MapCareplanIntent(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4559,11 +4645,11 @@ function MapCareplanStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4612,11 +4698,11 @@ function MapConditionClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4653,11 +4739,11 @@ function MapConditionClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4705,11 +4791,11 @@ function MapDeviceStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4761,11 +4847,11 @@ function MapEncounterStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4812,11 +4898,11 @@ function MapEncounterStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4846,18 +4932,18 @@ function MapEncounterStatus(arg1)
           <codeTemplate version="3.12.0">
             <id>d80f3ca9-b9a5-4b1d-bf65-5545ac3aba40</id>
             <name>MapImmunizationStatus</name>
-            <revision>1</revision>
+            <revision>2</revision>
             <lastModified>
-              <time>1667123605130</time>
+              <time>1669216770274</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4895,7 +4981,7 @@ function MapImmunizationStatus(arg1,negind)
             return &apos;NULL&apos;;
             break;         
          default:
-            return &apos;NULL&apos;;
+            return &apos;COMPLETED&apos;;
 
       }   
    }
@@ -4914,11 +5000,11 @@ function MapImmunizationStatus(arg1,negind)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -4961,11 +5047,11 @@ function MapImmunizationStatus(arg1,negind)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5016,11 +5102,11 @@ function MapMedicationStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5072,11 +5158,11 @@ function MapParticipantType(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5124,18 +5210,18 @@ function MapParticipantType(arg1)
           <codeTemplate version="3.12.0">
             <id>cd8ad885-3321-4beb-917e-bc08b48db952</id>
             <name>MapProcedureStatus</name>
-            <revision>1</revision>
+            <revision>3</revision>
             <lastModified>
-              <time>1667728253713</time>
+              <time>1669221620053</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5181,11 +5267,11 @@ function MapProcedureStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5242,11 +5328,11 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5288,11 +5374,11 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5336,11 +5422,11 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5375,18 +5461,18 @@ function MapVerificationStatus(str)
           <codeTemplate version="3.12.0">
             <id>58046a9c-7c2d-4dcc-ac91-f634af031869</id>
             <name>MedicalEquipmentBundle</name>
-            <revision>3</revision>
+            <revision>5</revision>
             <lastModified>
-              <time>1668223775057</time>
+              <time>1669212311877</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5447,18 +5533,18 @@ function MedicalEquipmentBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>03578d34-162b-4f1e-844a-ec5602024454</id>
             <name>MedicationBundle</name>
-            <revision>3</revision>
+            <revision>5</revision>
             <lastModified>
-              <time>1668223820419</time>
+              <time>1669212313233</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -5501,7 +5587,7 @@ function MedicationBundle(arg1,text,patientid,bundleId)
         var temp={};
         temp.resource=MedicationRequestResource(record.SubstanceAdministration,text,patientid);
 
-        SavefhirResource(temp.resource,bundleId,obj.Code);
+       SavefhirResource(temp.resource,bundleId,obj.Code);
         bundle.entry.push(temp)
    }  
 
@@ -5515,28 +5601,30 @@ function MedicationBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>0e9f7405-8c6e-4b93-bbf2-046fcbd6eb58</id>
             <name>MedicationRequestResource</name>
-            <revision>32</revision>
+            <revision>34</revision>
             <lastModified>
-              <time>1668251237216</time>
+              <time>1668945960843</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
               <type>FUNCTION</type>
               <code>/**
-   Modify the description here. Modify the function name and parameters as needed. One function per
-   template is recommended; create a new code template for each new function.
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
 
-   @param {String} arg1 - arg1 description
-   @return {String} return description
+    @param {String} arg1 - arg1 description
+    @param {Any} text - 
+    @param {Any} patientid - 
+    @return {String} return description
 */
 function MedicationRequestResource(arg1,text,patientid)
 {
@@ -5582,20 +5670,23 @@ function MedicationRequestResource(arg1,text,patientid)
    if(arg1.hasOwnProperty(&apos;Informants&apos;))
    {
       /Informant Block Start/
-      if(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity)!= undefined)
+      var tempreported=AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity);
+      if(tempreported!= undefined)
       {
-         medicationrequest.addContained(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity));    
-         medicationrequest.setReported(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity).getId())));
+         medicationrequest.addContained(tempreported);    
+         medicationrequest.setReported(new Reference().setReference(&apos;#&apos;+new Resource(tempreported.getId())));
       }
 
-      if(AuthortoPractictioner(arg1.Informants[0].AssignedEntity)!= undefined)
+      var tempreportedperson=AuthortoPractictioner(arg1.Informants[0].AssignedEntity);
+      if(tempreportedperson!= undefined)
       {
-           medicationrequest.addContained(AuthortoPractictioner(arg1.Informants[0].AssignedEntity));
+           medicationrequest.addContained(tempreportedperson);
       }
-               
-      if(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0])!= undefined)
+              
+        var tempreportedorg= AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0])
+      if(tempreportedorg!= undefined)
       {
-         medicationrequest.addContained(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]));
+         medicationrequest.addContained(tempreportedorg);
       }
 
       /Informant Block End/
@@ -5608,20 +5699,24 @@ function MedicationRequestResource(arg1,text,patientid)
    }
 
    /Author Block Start/
-   if(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor)!= undefined)
+   var temprecorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+   if(temprecorder!= undefined)
    {
-      medicationrequest.addContained(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor));    
-      medicationrequest.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor).getId())));
+      medicationrequest.addContained(temprecorder);    
+      medicationrequest.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
    }
 
-   if(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor)!= undefined)
+
+   var temprecorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor);
+   if(temprecorderperson!= undefined)
    {
-      medicationrequest.addContained(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor));
+      medicationrequest.addContained(temprecorderperson);
    }
-            
-   if(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization)!= undefined)
+           
+    var temprecorderorg= AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+   if(temprecorderorg!= undefined)
    {
-      medicationrequest.addContained(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization));
+      medicationrequest.addContained(temprecorderorg);
    }
 
    /Author Block End/
@@ -5680,20 +5775,23 @@ function MedicationRequestResource(arg1,text,patientid)
         var tempperformer=arg1.Performers[_perf];
 
         /Performer Block Start/
-        if(AuthortoPractictionerRole(tempperformer.AssignedEntity)!= undefined)
+        var tempsupport=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+        if(tempsupport!= undefined)
         {
-            medicationrequest.addContained(AuthortoPractictionerRole(tempperformer.AssignedEntity));    
-            medicationrequest.addSupportingInformation(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(tempperformer.AssignedEntity).getId())));
+            medicationrequest.addContained(tempsupport);    
+            medicationrequest.addSupportingInformation(new Reference().setReference(&apos;#&apos;+new Resource(tempsupport.getId())));
         }
 
-       if(AuthortoPractictioner(tempperformer.AssignedEntity)!= undefined)
+        var tempsupportperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+       if(tempsupportperson!= undefined)
        {
-          medicationrequest.addContained(AuthortoPractictioner(tempperformer.AssignedEntity));
+          medicationrequest.addContained(tempsupportperson);
        }
                 
-       if(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0])!= undefined)
+        var tempsupportorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+       if(tempsupportorg!= undefined)
        {
-          medicationrequest.addContained(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]));
+          medicationrequest.addContained(tempsupportorg);
        }
 
        /Performer Block End/
@@ -5842,10 +5940,11 @@ function MedicationRequestResource(arg1,text,patientid)
 
                      if(tempparticipant.TypeCode.Name==&apos;LOC&apos;)
                      {
-                        if(ParticipanttoOrganization(tempparticipant.ParticipantRole)!=undefined &amp;&amp; ParticipanttoOrganization(tempparticipant.ParticipantRole)!=null)
+                        var tempperf=ParticipanttoOrganization(tempparticipant.ParticipantRole);
+                        if(tempperf!=undefined &amp;&amp; tempperf!=null)
                         {
-                           medicationrequest.addContained(ParticipanttoOrganization(tempparticipant.ParticipantRole))
-                           dispense.setPerformer(new Reference().setReference(&apos;#&apos;+new Resource(ParticipanttoOrganization(tempparticipant.ParticipantRole).getId())))   
+                           medicationrequest.addContained(tempperf)
+                           dispense.setPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempperf.getId())))   
                         }
                         
                      }
@@ -5858,20 +5957,24 @@ function MedicationRequestResource(arg1,text,patientid)
                   var tempperformer1=er1.supply.Performers[_perf1];
 
                   /Performer Block Start/
-                  if(AuthortoPractictionerRole(tempperformer1.AssignedEntity)!= undefined)
+                  var tempsupportinfo=AuthortoPractictionerRole(tempperformer1.AssignedEntity);
+                  if(tempsupportinfo!= undefined)
                   {
-                     medicationrequest.addContained(AuthortoPractictionerRole(tempperformer1.AssignedEntity));    
-                     medicationrequest.addSupportingInformation(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(tempperformer1.AssignedEntity).getId())));
+                     medicationrequest.addContained(tempsupportinfo);    
+                     medicationrequest.addSupportingInformation(new Reference().setReference(&apos;#&apos;+new Resource(tempsupportinfo.getId())));
                   }
 
-                  if(AuthortoPractictioner(tempperformer1.AssignedEntity)!= undefined)
+
+                    var tempsupportinfoperson=AuthortoPractictioner(tempperformer1.AssignedEntity);
+                  if(tempsupportinfoperson!= undefined)
                   {
-                     medicationrequest.addContained(AuthortoPractictioner(tempperformer1.AssignedEntity));
+                     medicationrequest.addContained(tempsupportinfoperson);
                   }
                             
-                  if(AuthortoOrganization(tempperformer1.AssignedEntity.Organizations[0])!= undefined)
+                    var tempsupportinfoorg=AuthortoOrganization(tempperformer1.AssignedEntity.Organizations[0]);
+                  if(tempsupportinfoorg!= undefined)
                   {
-                     medicationrequest.addContained(AuthortoOrganization(tempperformer1.AssignedEntity.Organizations[0]));
+                     medicationrequest.addContained(tempsupportinfoorg);
                   }
 
                    /Performer Block End/
@@ -5879,20 +5982,24 @@ function MedicationRequestResource(arg1,text,patientid)
                 }
 
                /Author Block Start/
-               if(AuthortoPractictionerRole(er1.supply.Authors[0].AssignedAuthor)!= undefined)
+
+               var tempperf1=AuthortoPractictionerRole(er1.supply.Authors[0].AssignedAuthor);
+               if(tempperf1!= undefined)
                {
-                  medicationrequest.addContained(AuthortoPractictionerRole(er1.supply.Authors[0].AssignedAuthor));    
-                  medicationrequest.setPerformer(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(er1.supply.Authors[0].AssignedAuthor).getId())));
+                  medicationrequest.addContained(tempperf1);    
+                  medicationrequest.setPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempperf1.getId())));
                }
 
-               if(AuthortoPractictioner(er1.supply.Authors[0].AssignedAuthor)!= undefined)
+               var tempperf1person=AuthortoPractictioner(er1.supply.Authors[0].AssignedAuthor);
+               if(tempperf1person!= undefined)
                {
-                  medicationrequest.addContained(AuthortoPractictioner(er1.supply.Authors[0].AssignedAuthor));
+                  medicationrequest.addContained(tempperf1person);
                }
                            
-               if(AuthortoOrganization(er1.supply.Authors[0].AssignedAuthor.Organization)!= undefined)
+                var tempperf1org=AuthortoOrganization(er1.supply.Authors[0].AssignedAuthor.Organization);
+               if(tempperf1org!= undefined)
                {
-                  medicationrequest.addContained(AuthortoOrganization(er1.supply.Authors[0].AssignedAuthor.Organization));
+                  medicationrequest.addContained(tempperf1org);
                }
                /Author Block End/
             }
@@ -5933,18 +6040,18 @@ function MedicationRequestResource(arg1,text,patientid)
           <codeTemplate version="3.12.0">
             <id>e308220f-8718-4728-902a-0948acd2c530</id>
             <name>ObservationResource</name>
-            <revision>22</revision>
+            <revision>23</revision>
             <lastModified>
-              <time>1668426100497</time>
+              <time>1668946395418</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6011,21 +6118,37 @@ function MedicationRequestResource(arg1,text,patientid)
          var participant=arg1.Participants[_p];
          if(participant.TypeCode.Name==&apos;PRF&apos;)
          {
-            var authenticator=&apos;#&apos;+new Resource(ParticipanttoPractictioner(participant.ParticipantRole).getId());
-            observation.addContained(ParticipanttoPractictioner(participant.ParticipantRole));    
+
+            var tempauthenticator=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempauthenticator!=undefined)
+            {
+                var authenticator=&apos;#&apos;+new Resource(tempauthenticator.getId());
+                observation.addContained(tempauthenticator);    
+            }
+            
          }
 
          if(participant.TypeCode.Name==&apos;CST&apos;)
          {
-            var custodian=&apos;#&apos;+new Resource(ParticipanttoPractictioner(participant.ParticipantRole).getId());
-            observation.addContained(ParticipanttoPractictioner(participant.ParticipantRole));    
+            var tempcustodian=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempcustodian!=undefined)
+            {
+                var custodian=&apos;#&apos;+new Resource(tempcustodian.getId());
+                observation.addContained(tempcustodian);  
+            }
+              
          }
 
          if(participant.TypeCode.Name==&apos;PRF&apos;)
          {
-            var performer=&apos;#&apos;+new Resource(ParticipanttoPractictioner(participant.ParticipantRole).getId());
-            observation.addContained(ParticipanttoPractictioner(participant.ParticipantRole));
-            observation.addPerformer().setReference(performer);
+            var temp_perf=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(temp_perf!=undefined)
+            {
+                var performer=&apos;#&apos;+new Resource(temp_perf.getId());
+                observation.addContained(temp_perf);
+                observation.addPerformer().setReference(performer);
+            }
+            
          }
       }
 
@@ -6036,9 +6159,15 @@ function MedicationRequestResource(arg1,text,patientid)
       for(var _r=0;_r&lt;arg1.References.length;_r++)
       {
          var tempreference=arg1.References[_r];
+
+         var tempdocument=ExternalDocumentReference(tempreference,patientid,authenticator,custodian);
+         if(tempdocument!=undefined)
+         {
+            observation.addDerivedFrom(new Reference().setReference(&apos;#&apos;+new Resource(tempdocument.getId())));
+            observation.addContained(tempdocument);    
+         }
          
-         observation.addDerivedFrom(new Reference().setReference(&apos;#&apos;+new Resource(ExternalDocumentReference(tempreference,patientid,authenticator,custodian).getId())));
-         observation.addContained(ExternalDocumentReference(tempreference,patientid,authenticator,custodian));    
+         
       }  
    }
       
@@ -6127,11 +6256,11 @@ function MedicationRequestResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6258,11 +6387,11 @@ function OrganizationResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6369,11 +6498,11 @@ function ParticipanttoOrganization(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6442,11 +6571,11 @@ function ParticipanttoPatient(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6510,11 +6639,11 @@ function ParticipanttoPractictioner(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6583,18 +6712,18 @@ function ParticipanttoRelatedPerson(arg1,patientid)
           <codeTemplate version="3.12.0">
             <id>dbd9787b-a3e1-4a32-acac-4a6e76720e3a</id>
             <name>PayorBundle</name>
-            <revision>3</revision>
+            <revision>4</revision>
             <lastModified>
-              <time>1668237034625</time>
+              <time>1669138049361</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6637,7 +6766,7 @@ function PayorBundle(arg1,text,patientid,bundleId)
         var temp={};
         
         temp.resource=CoverageResource(record.Act,text,patientid);
-		SavefhirResource(temp.resource,bundleId,obj.Code);
+		//SavefhirResource(temp.resource,bundleId,obj.Code);
         bundle.entry.push(temp)
    }  
 
@@ -6651,18 +6780,18 @@ function PayorBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>c00dda34-9bfe-4d03-acf4-3dca421317a8</id>
             <name>ProcedureBundle</name>
-            <revision>7</revision>
+            <revision>9</revision>
             <lastModified>
-              <time>1668236185663</time>
+              <time>1669212315037</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6732,18 +6861,18 @@ function ProcedureBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>b9b28fe5-409d-4012-9e9b-d9d9b6980433</id>
             <name>ProcedureResource</name>
-            <revision>11</revision>
+            <revision>16</revision>
             <lastModified>
-              <time>1668247060159</time>
+              <time>1668953632685</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -6762,6 +6891,8 @@ function ProcedureResource(arg1,text,patientid)
     var procedure = new org.hl7.fhir.r4.model.Procedure();
     var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
     var parser = ctx.newJsonParser();  
+
+    //logger.info(&apos;ProcedureResource-&gt;&apos;+JSON.stringify(arg1));
 
     for(var _id=0;_id&lt;arg1.Ids.length;_id++)
     {
@@ -6797,20 +6928,24 @@ function ProcedureResource(arg1,text,patientid)
     }
 
     /Author Block Start/
-    if(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor)!= undefined)
+    var temprecorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+    if(temprecorder!= undefined)
     {
-        procedure.addContained(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor));    
-        procedure.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor).getId())));
+        procedure.addContained(temprecorder);    
+        procedure.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
     }
 
-    if(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor)!= undefined)
+   
+    var temprecorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor);
+    if(temprecorderperson!= undefined)
     {
-        procedure.addContained(AuthortoPractictioner(arg1.Authors[0].AssignedAuthor));
+        procedure.addContained(temprecorderperson);
     }
             
-    if(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization)!= undefined)
+    var temprecorderorg=AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+    if(temprecorderorg!= undefined)
     {
-        procedure.addContained(AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization));
+        procedure.addContained(temprecorderorg);
     }
 
     /Author Block End/
@@ -6819,21 +6954,25 @@ function ProcedureResource(arg1,text,patientid)
     if(arg1.hasOwnProperty(&apos;Informants&apos;))
     {
         /Informant Block Start/
-        if(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity)!= undefined)
+        var tempasserter=AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity);
+        if(tempasserter!= undefined)
         {
-            procedure.addContained(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity));    
-            procedure.setAsserter(new Reference().setType(&apos;Practitioner&apos;).setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity).getId())));
+            procedure.addContained(tempasserter);    
+            procedure.setAsserter(new Reference().setType(&apos;Practitioner&apos;).setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
 
         }
 
-        if(AuthortoPractictioner(arg1.Informants[0].AssignedEntity)!= undefined)
+      
+        var tempasserterperson=AuthortoPractictioner(arg1.Informants[0].AssignedEntity);
+        if(tempasserterperson!= undefined)
         {
-            procedure.addContained(AuthortoPractictioner(arg1.Informants[0].AssignedEntity));
+            procedure.addContained(tempasserterperson);
         }
                
-        if(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0])!= undefined)
+        var tempasserterorg=AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]);
+        if(tempasserterorg!= undefined)
         {
-            procedure.addContained(AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]));
+            procedure.addContained(tempasserterorg);
         }
         /Informant Block End/
 
@@ -6884,22 +7023,26 @@ function ProcedureResource(arg1,text,patientid)
         var tempperformer=arg1.Performers[_perf];
 
         /Performer Block Start/
-        if(AuthortoPractictionerRole(tempperformer.AssignedEntity)!= undefined)
+        var _tempperformer=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+        if(_tempperformer!= undefined)
         {
-            procedure.addContained(AuthortoPractictionerRole(tempperformer.AssignedEntity));    
-            procedure.addPerformer(new org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent().setActor(new Reference().setType(&apos;Practitioner&apos;).setReference(&apos;#&apos;+new Resource(AuthortoPractictionerRole(tempperformer.AssignedEntity).getId()))));
+            procedure.addContained(_tempperformer);    
+            procedure.addPerformer(new org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent().setActor(new Reference().setType(&apos;Practitioner&apos;).setReference(&apos;#&apos;+new Resource(_tempperformer.getId()))));
 
             
         }
 
-        if(AuthortoPractictioner(tempperformer.AssignedEntity)!= undefined)
+        
+        var tempperformerperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+        if(tempperformerperson!= undefined)
         {
-            procedure.addContained(AuthortoPractictioner(tempperformer.AssignedEntity));
+            procedure.addContained(tempperformerperson);
         }
                 
-        if(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0])!= undefined)
+        var tempperformerorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+        if(tempperformerorg!= undefined)
         {
-            procedure.addContained(AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]));
+            procedure.addContained(tempperformerorg);
         }
 
         /Performer Block End/
@@ -6911,19 +7054,21 @@ function ProcedureResource(arg1,text,patientid)
         var tempparticipant1=arg1.Participants[_i];
         if(tempparticipant1.TypeCode.Name==&apos;LOC&apos; &amp;&amp; (tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;SDLOC&apos; || tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;PLC&apos;))
         {
-            if(LocationResource(tempparticipant1.ParticipantRole)!=undefined)
+            var templocation=LocationResource(tempparticipant1.ParticipantRole);
+            if(templocation!=undefined)
             {
-                procedure.setLocation(new Reference().setType(&apos;Location&apos;).setReference(&apos;#&apos;+new Resource(LocationResource(tempparticipant1.ParticipantRole).getId())));
-                procedure.addContained(LocationResource(tempparticipant1.ParticipantRole))
+                procedure.setLocation(new Reference().setType(&apos;Location&apos;).setReference(&apos;#&apos;+new Resource(templocation.getId())));
+                procedure.addContained(templocation)
             }
         }
 
         if(tempparticipant1.TypeCode.Name==&apos;DEV&apos; &amp;&amp; tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;MANU&apos;)
         {
-            if(DeviceResource(tempparticipant1.ParticipantRole)!=undefined)
+            var tempdevice=DeviceResource(tempparticipant1.ParticipantRole,null,patientid);
+            if(tempdevice!=undefined)
             {
-                procedure.addFocalDevice(new org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent().setManipulated(&apos;#&apos;+new Resource(DeviceResource(tempparticipant1.ParticipantRole,null,patientid).getId())));
-                procedure.addContained(DeviceResource(tempparticipant1.ParticipantRole,null,patientid))
+                procedure.addFocalDevice(new org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent().setManipulated(&apos;#&apos;+new Resource(tempdevice.getId())));
+                procedure.addContained(tempdevice)
             }
         }
     }
@@ -6992,18 +7137,18 @@ function ProcedureResource(arg1,text,patientid)
           <codeTemplate version="3.12.0">
             <id>623e1bf0-dc1b-4402-8dc2-3c71563551ab</id>
             <name>ResultBundle</name>
-            <revision>5</revision>
+            <revision>7</revision>
             <lastModified>
-              <time>1668223973516</time>
+              <time>1669212315736</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7069,18 +7214,18 @@ function ResultBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>bb55803a-fefe-4bb1-b9dc-aabbd5db0033</id>
             <name>ResultResource</name>
-            <revision>8</revision>
+            <revision>16</revision>
             <lastModified>
-              <time>1668247060216</time>
+              <time>1669135774912</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7100,11 +7245,12 @@ function ResultBundle(arg1,text,patientid,bundleId)
         }  
     }
 
+    /*
     if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
     {
         diagnosticreport.setText(GetNarrative(txt))
     }
-
+*/
     diagnosticreport.setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(MapResultStatus(arg1.StatusCode.Code)));
 
     diagnosticreport.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
@@ -7125,10 +7271,12 @@ function ResultBundle(arg1,text,patientid,bundleId)
         for(var _s=0;_s&lt;arg1.Specimens.length;_s++)
         {
             var tempspecimen=arg1.Specimens[_s];
-            if(SpecimenResource(tempspecimen.SpecimenRole)!=undefined)
+
+            var tempspecimen=SpecimenResource(tempspecimen.SpecimenRole);
+            if(tempspecimen!=undefined)
             {
-                diagnosticreport.addSpecimen(new Reference().setReference(&apos;#&apos;+new Resource(SpecimenResource(tempspecimen.SpecimenRole).getId())));  
-                diagnosticreport.addContained(SpecimenResource(tempspecimen.SpecimenRole))
+                diagnosticreport.addSpecimen(new Reference().setReference(&apos;#&apos;+new Resource(tempspecimen.getId())));  
+                diagnosticreport.addContained(tempspecimen)
 
             }
             
@@ -7152,33 +7300,43 @@ function ResultBundle(arg1,text,patientid,bundleId)
 
     
    
-   
-   for(var _comp=0;_comp&lt;arg1.Components.length&gt;0;_comp++)
+   if(arg1.hasOwnProperty(&apos;Components&apos;))
    {
-      var tempcomp=arg1.Components[_comp];
-      if(tempcomp.hasOwnProperty(&apos;Observation&apos;))
-      {
-       
-        if(VitalComponent(tempcomp.Observation,patientid)!=undefined)
-        {
+        for(var _comp=0;_comp&lt;arg1.Components.length&gt;0;_comp++)
+       {
+          var tempcomp=arg1.Components[_comp];
+          if(tempcomp.hasOwnProperty(&apos;Observation&apos;))
+          {
+           
+            var tempcomponent=VitalComponent(tempcomp.Observation,patientid);
+            if(tempcomponent!=undefined)
+            {
 
-            var observationid=new Reference(&apos;#&apos;+new Resource(VitalComponent(tempcomp.Observation,patientid).getId()));
-            diagnosticreport.addResult(observationid);
-            diagnosticreport.addContained(VitalComponent(tempcomp.Observation,patientid))    
-        } 
-        
-      }
-      
+                var observationid=new Reference(&apos;#&apos;+new Resource(tempcomponent.getId()));
+                diagnosticreport.addResult(observationid);
+                diagnosticreport.addContained(tempcomponent)    
+            } 
+            
+          }
+          
+     
+       }
+
  
    }
-
-
-    diagnosticreport.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(diagnosticreport))));
- //   var oDiagnosticReport=JSON.parse(parser.encodeResourceToString(diagnosticreport));
-    //logger.info(&apos;ObservationResource-&gt;&apos;+parser.encodeResourceToString(observation));
-
-    return diagnosticreport;
    
+    	diagnosticreport.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(diagnosticreport))));
+ //   var oDiagnosticReport=JSON.parse(parser.encodeResourceToString(diagnosticreport));
+    //logger.info(&apos;Result Resource-&gt;&apos;+parser.encodeResourceToString(diagnosticreport));
+
+    if(countkey(parser.encodeResourceToString(diagnosticreport))&gt;4)
+    {
+        //SavefhirResource(diagnosticreport,bundleid,section)    ;
+        return diagnosticreport;
+    }
+    
+//    return diagnosticreport;
+      
 
 }</code>
             </properties>
@@ -7193,11 +7351,11 @@ function ResultBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7260,18 +7418,18 @@ function ResultBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>08314791-42c0-458f-8b5a-cc49019f8bf2</id>
             <name>SocialHistoryBundle</name>
-            <revision>7</revision>
+            <revision>9</revision>
             <lastModified>
-              <time>1668251190569</time>
+              <time>1669212316470</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7315,7 +7473,7 @@ function SocialHistoryBundle(arg1,text,patientid,bundleid)
         
         temp.resource=ObservationResource(record.Observation,text,patientid,obj.Code);    
         
-        SavefhirResource(temp.resource,bundleid,obj.Code);
+       SavefhirResource(temp.resource,bundleid,obj.Code);
 
         bundle.entry.push(temp)
    }  
@@ -7337,11 +7495,11 @@ function SocialHistoryBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7400,18 +7558,18 @@ function SpecimenResource(arg1)
           <codeTemplate version="3.12.0">
             <id>7604e8c3-d46c-461e-949c-82f992cf0c3b</id>
             <name>VitalBundle</name>
-            <revision>6</revision>
+            <revision>8</revision>
             <lastModified>
-              <time>1668224020566</time>
+              <time>1669212317837</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7455,7 +7613,7 @@ function VitalBundle(arg1,text,patientid,bundleId)
         
         temp.resource=VitalResource(record.Organizer,text,patientid,obj.Code);    
         bundle.entry.push(temp);
-        SavefhirResource(temp.resource,bundleId,obj.Code);
+       SavefhirResource(temp.resource,bundleId,obj.Code);
    }  
 
    //logger.info(&apos;VitalBundle-&gt;&apos;+JSON.stringify(bundle)) 
@@ -7475,11 +7633,11 @@ function VitalBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7661,18 +7819,18 @@ function VitalBundle(arg1,text,patientid,bundleId)
           <codeTemplate version="3.12.0">
             <id>be554cb7-0d13-4069-ab40-4c2ac5ac4bb2</id>
             <name>VitalResource</name>
-            <revision>16</revision>
+            <revision>17</revision>
             <lastModified>
-              <time>1668243364705</time>
+              <time>1668946917191</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7724,12 +7882,13 @@ function VitalBundle(arg1,text,patientid,bundleId)
       if(tempcomp.hasOwnProperty(&apos;Observation&apos;))
       {
        
-        if(VitalComponent(tempcomp.Observation,patientid)!=undefined)
+        var tempcomponent=VitalComponent(tempcomp.Observation,patientid);
+        if(tempcomponent!=undefined)
         {
 
-            var observationid=new Reference(&apos;#&apos;+new Resource(VitalComponent(tempcomp.Observation,patientid).getId()));
+            var observationid=new Reference(&apos;#&apos;+new Resource(tempcomponent.getId()));
             observation.addHasMember(observationid);
-            observation.addContained(VitalComponent(tempcomp.Observation,patientid))    
+            observation.addContained(tempcomponent)    
         } 
         
       }
@@ -7753,9 +7912,9 @@ function VitalBundle(arg1,text,patientid,bundleId)
       <codeTemplateLibrary version="3.12.0">
         <id>2f9cc778-9130-4fdd-9f2d-b2d666268c89</id>
         <name>Library 1bbb</name>
-        <revision>11</revision>
+        <revision>18</revision>
         <lastModified>
-          <time>1668225258721</time>
+          <time>1669130240396</time>
           <timezone>Asia/Calcutta</timezone>
         </lastModified>
         <description>This library was added upon migration to version 3.3.0. It includes all pre-existing
@@ -7773,32 +7932,46 @@ necessarily including all code templates on all channels all the time.</descript
           <string>19147717-a61f-4726-b391-306220d5fa43</string>
         </enabledChannelIds>
         <disabledChannelIds>
+          <string>268c87ee-b6cc-435b-a498-3484197be2ca</string>
+          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
+          <string>efd79df6-4275-42e1-b342-4c186eb0dccc</string>
+          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>cdc68cb2-21f4-447e-b7b9-a0d120a91aed</string>
           <string>40a447a8-89f7-494c-b224-5880c7e86c73</string>
           <string>617546b5-34e3-4e61-9b1d-5c40909c3787</string>
+          <string>92472400-a82a-4805-b3fe-f92b5980aa2f</string>
+          <string>b9b54c9b-eda4-43c9-8109-fa41bd6cc8fb</string>
           <string>601011b3-f0e9-4bbc-9cf4-dfa658c79e09</string>
-          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
-          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>dd76bbd8-85b9-4718-b8e2-bdcbb018a611</string>
+          <string>8199c8b2-befa-4924-a390-526c4f3b1d31</string>
         </disabledChannelIds>
         <codeTemplates/>
       </codeTemplateLibrary>
       <codeTemplateLibrary version="3.12.0">
         <id>285e28ea-e844-4158-97a3-d0ee577778ac</id>
         <name>utilityfunctions</name>
-        <revision>18</revision>
+        <revision>26</revision>
         <lastModified>
-          <time>1668233079664</time>
+          <time>1669130240389</time>
           <timezone>Asia/Calcutta</timezone>
         </lastModified>
         <description></description>
         <includeNewChannels>false</includeNewChannels>
         <enabledChannelIds>
+          <string>268c87ee-b6cc-435b-a498-3484197be2ca</string>
+          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
+          <string>efd79df6-4275-42e1-b342-4c186eb0dccc</string>
+          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>cdc68cb2-21f4-447e-b7b9-a0d120a91aed</string>
           <string>40a447a8-89f7-494c-b224-5880c7e86c73</string>
           <string>aba9f80e-e0c2-4b14-b365-9f5f416d51e5</string>
           <string>6485566a-e026-44c1-98cf-f7c62a948022</string>
           <string>617546b5-34e3-4e61-9b1d-5c40909c3787</string>
+          <string>92472400-a82a-4805-b3fe-f92b5980aa2f</string>
+          <string>b9b54c9b-eda4-43c9-8109-fa41bd6cc8fb</string>
           <string>601011b3-f0e9-4bbc-9cf4-dfa658c79e09</string>
-          <string>abf8a28b-b96e-439d-ae18-e79e27a26915</string>
-          <string>264cf267-3368-4571-87d8-c0562c3a6912</string>
+          <string>dd76bbd8-85b9-4718-b8e2-bdcbb018a611</string>
+          <string>8199c8b2-befa-4924-a390-526c4f3b1d31</string>
         </enabledChannelIds>
         <disabledChannelIds>
           <string>41380607-1411-4b46-a8a7-460267132a58</string>
@@ -7824,11 +7997,11 @@ necessarily including all code templates on all channels all the time.</descript
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7862,11 +8035,11 @@ function checkdata(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7902,11 +8075,11 @@ function clean(obj)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -7948,11 +8121,11 @@ for(var _c=0;_c&lt;Object.keys(str).length;_c++) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8023,18 +8196,18 @@ for(var _c=0;_c&lt;Object.keys(str).length;_c++) {
           <codeTemplate version="3.12.0">
             <id>dd2a302e-186c-476e-a168-245acbfb0907</id>
             <name>formatdate</name>
-            <revision>20</revision>
+            <revision>22</revision>
             <lastModified>
-              <time>1668251564499</time>
+              <time>1668949535690</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8057,6 +8230,26 @@ function formatdate(arg1) {
 		var time=arg1.substr(8,6);
 		
 		var timezone=arg1.substr(15,4);
+
+		if(arg1.includes(&apos;-&apos;))
+		{
+			var operation=&apos;-&apos;
+		}
+		else
+		{
+			var operation=&apos;+&apos;
+		}
+		
+		return DateUtil.convertDate(&quot;yyyyMMdd&quot;, &quot;yyyy-MM-dd&quot;, date)+&apos;T&apos;+DateUtil.convertDate(&quot;HHmmss&quot;, &quot;HH:mm:ss&quot;, time)+operation+DateUtil.convertDate(&quot;HHmm&quot;, &quot;HH:mm&quot;, timezone);
+		
+	}
+	else if(arg1.length==17 &amp;&amp; (arg1.includes(&apos;-&apos;) || arg1.includes(&apos;+&apos;)))
+	{
+		var date=arg1.substr(0,8);
+		
+		var time=arg1.substr(8,4)+&apos;00&apos;;
+		
+		var timezone=arg1.substr(13,4);
 
 		if(arg1.includes(&apos;-&apos;))
 		{
@@ -8138,11 +8331,11 @@ function parseCCDBirthDate(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8210,11 +8403,11 @@ function GetAnyTypeFeatureMap(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8253,11 +8446,11 @@ function GetAnyTypeFeatureMap(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8296,11 +8489,11 @@ function Getcareteamid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8341,11 +8534,11 @@ function GetClinakosId()
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8404,11 +8597,11 @@ function GetEffectiveTimeInfo(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8443,11 +8636,11 @@ function GetHashValue(data)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8491,11 +8684,11 @@ function GetOrganizationid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8551,11 +8744,11 @@ function GetPerformerid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8594,11 +8787,11 @@ function GetRelatedPersonid(arg1,ptid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8637,11 +8830,11 @@ function GetSupplyid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8724,11 +8917,11 @@ function GetSupplyid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8862,11 +9055,11 @@ function GetTimeandFrequency(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -8978,11 +9171,11 @@ function getvaluenunit(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -9336,11 +9529,11 @@ function safe_add (x, y)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -9378,11 +9571,11 @@ function mysql_real_escape_string (str) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -9415,11 +9608,11 @@ function removeDuplicates(arr) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -9468,11 +9661,11 @@ function replaceDiacritics(str){
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -9524,11 +9717,11 @@ function stripTZ(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-                <contextType>DESTINATION_DISPATCHER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
             <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">

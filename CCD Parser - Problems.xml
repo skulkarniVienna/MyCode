@@ -1,16 +1,16 @@
 <channel version="3.12.0">
-  <id>264cf267-3368-4571-87d8-c0562c3a6912</id>
+  <id>cdc68cb2-21f4-447e-b7b9-a0d120a91aed</id>
   <nextMetaDataId>2</nextMetaDataId>
-  <name>CCD Parser - Payer</name>
+  <name>CCD Parser - Problems</name>
   <description></description>
-  <revision>15</revision>
+  <revision>3</revision>
   <sourceConnector version="3.12.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
     <properties class="com.mirth.connect.connectors.vm.VmReceiverProperties" version="3.12.0">
       <pluginProperties/>
       <sourceConnectorProperties version="3.12.0">
-        <responseVariable>Auto-generate (Destinations completed)</responseVariable>
+        <responseVariable>None</responseVariable>
         <respondAfterProcessing>true</respondAfterProcessing>
         <processBatch>false</processBatch>
         <firstResponse>false</firstResponse>
@@ -27,80 +27,118 @@
     <transformer version="3.12.0">
       <elements>
         <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.12.0">
-          <name>payer</name>
+          <name>Problem</name>
           <sequenceNumber>0</sequenceNumber>
           <enabled>true</enabled>
-          <script>var _section = sourceMap.get(&apos;payerSection&apos;);
-var _payerText=sourceMap.get(&apos;payerSectionText&apos;)
+          <script>var problemSection = sourceMap.get(&apos;problemSection&apos;);
+var _problemText = sourceMap.get(&apos;problemText&apos;);
+
+
 var section = {};
-if(_section != null) {
-	section.Code = GetCE(_section.getCode());
-	section.Title = GetST(_section.getTitle());
-	section.Text = GetStrucDocText(_section.getText());
+if (problemSection != null) {
+    section.Code = GetCE(problemSection.getCode());
+    section.Title = GetST(problemSection.getTitle());
 
-	var _entries = _section.getEntries();
-	var entries = [];
-	if(_entries != null) {
-		var _entriesSize = _entries.size();
-		var _i = 0;
-		if(_entriesSize &gt; 0) {
-			for(_i = 0;_i &lt; _entriesSize ; _i++) {
-			var entry = {};
-			var _entry = _entries.get(_i);
+    var _entries = problemSection.getEntries();
+    var entries = [];
+    if (_entries != null) {
+        var _entriesSize = _entries.size();
+        if (_entriesSize &gt; 0) {
+        		var _i = 0;
+            	for (_i = 0; _i &lt; _entriesSize; _i++) {
+                	var entry = {};
+                	var _entry = _entries.get(_i);
 
-				if(_entry != null) {
-					var act = {};
-					var _act = _entry.getAct();
-					if(_act != null) {
-						act.Ids = GetIIList(_act.getIds());
-						act.MoodCode = GetVocabInfo(_act.getMoodCode());
-						act.Code = GetCD(_act.getCode());
-						act.Text = GetED(_act.getText());
-						act.EffectiveTime = GetIVL_TS(_act.getEffectiveTime());
-						act.StatusCode = GetCS(_act.getStatusCode());
-						act.PriorityCode = GetCE(_act.getPriorityCode());
-						act.Authors = GetAuthorList(_act.getAuthors());
-						act.Participants = GetParticipant2List(_act.getParticipants());
-						act.Performers = GetPerformer2List(_act.getPerformers());
-						
-						var _entryrelationships = _act.getEntryRelationships();
-						var entryrelationships = [];
-						if(_entryrelationships != null) {
-						var _entryrelationshipsSize = _entryrelationships.size();
-							
-						var _entryRelationshipCount = 0;
-						for(_entryRelationshipCount = 0;_entryRelationshipCount &lt; _entryrelationshipsSize ; _entryRelationshipCount++) {
-							var entryrelationship = {};
-							var _entryrelationship = _entryrelationships.get(_entryRelationshipCount);
-							entryrelationship = PopulateEntityRelationshipswithText(_entryrelationship,_payerText);
-							entryrelationship.TypeCode = GetVocabInfo(_entryrelationship.getTypeCode());
-								entryrelationships.push(entryrelationship);
+                	if (_entry != null) {
+                    	var act = {};
+                    	var _act = _entry.getAct();
+                    	if (_act != null) {
+                    		act.StatusCode = GetCS(_act.getStatusCode());
+                    		act.Informants = GetInformant12List(_act.getInformants());
+                              act.Authors  = GetAuthorList(_act.getAuthors());
+                        		var _Actentryrelationships = _act.getEntryRelationships();
+                        		var Actentryrelationships = [];
+
+                        		if (_Actentryrelationships != null) {
+                            		var _ActentryrelationshipsSize = _Actentryrelationships.size();
+                            		var _ActentryRelationshipCount = 0;
+                            		for (_ActentryRelationshipCount = 0; _ActentryRelationshipCount &lt; _ActentryrelationshipsSize; _ActentryRelationshipCount++) {
+                                		var Actentryrelationship = {};
+                                		var _Actentryrelationship = _Actentryrelationships.get(_ActentryRelationshipCount);
+                                		var _ActentryrelationshipObservation = _Actentryrelationship.getObservation();
+                                		if (_ActentryrelationshipObservation != null) {
+                                    		var ActentryrelationshipObservation = {};
+                                    		ActentryrelationshipObservation.Ids = GetIIList(_ActentryrelationshipObservation.getIds());
+                                    		ActentryrelationshipObservation.Values = GetAnyList(_ActentryrelationshipObservation.getValues());
+
+                                    		if(ActentryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL != null &amp;&amp; ActentryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL != undefined){
+										var _referenceValueForCode = ActentryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL.Value;
+										ActentryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL.Value = GetValueFromTable(_problemText,_referenceValueForCode);
 									}
-								}
+                                    		ActentryrelationshipObservation.Authors  = GetAuthorList(_ActentryrelationshipObservation.getAuthors());
+                                    		ActentryrelationshipObservation.StatusCode = GetCS(_ActentryrelationshipObservation.getStatusCode());
+                                    		ActentryrelationshipObservation.Code = GetCD(_ActentryrelationshipObservation.getCode());
+                                    		ActentryrelationshipObservation.EffectiveTime = GetIVL_TS(_ActentryrelationshipObservation.getEffectiveTime());
+                                    		ActentryrelationshipObservation.ClassCode = GetVocabInfo(_ActentryrelationshipObservation.getClassCode());
+                                    		ActentryrelationshipObservation.MoodCode = GetVocabInfo(_ActentryrelationshipObservation.getMoodCode());
 
-								act.EntryRelationships = entryrelationships;
-					}
-					entry.Act = act;
-				}
-			entries.push(entry);
-			}	
-		} 
-	}
-	section.Entries = entries;
-	
-	section.ClassCode=GetVocabInfo(_section.getClassCode());
-	section.MoodCode=GetVocabInfo(_section.getMoodCode());
+                                    		/// Start
+										var _ActentryrelationshipObservationentryrelationships = _ActentryrelationshipObservation.getEntryRelationships();
+                        						var ActentryrelationshipObservationentryrelationships = [];
+
+                        						if (_ActentryrelationshipObservationentryrelationships != null) {
+			                            			var _ActentryrelationshipObservationentryrelationshipsSize = _ActentryrelationshipObservationentryrelationships.size();
+               			             			var _ActentryrelationshipObservationentryrelationshipsCount = 0;
+                            						for (_ActentryrelationshipObservationentryrelationshipsCount = 0; _ActentryrelationshipObservationentryrelationshipsCount &lt; _ActentryrelationshipObservationentryrelationshipsSize; _ActentryrelationshipObservationentryrelationshipsCount++) {
+                                					var ActentryrelationshipObservationentryrelationship = {};
+                                					var _ActentryrelationshipObservationentryrelationship = _ActentryrelationshipObservationentryrelationships.get(_ActentryrelationshipObservationentryrelationshipsCount);
+                                					var _ActentryrelationshipObservationentryrelationshipObservation = _ActentryrelationshipObservationentryrelationship.getObservation();
+                                					if (_ActentryrelationshipObservationentryrelationshipObservation != null) {
+                                    					var ActentryrelationshipObservationentryrelationshipObservation = {};
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.Ids = GetIIList(_ActentryrelationshipObservationentryrelationshipObservation.getIds());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.Values = GetAnyList(_ActentryrelationshipObservationentryrelationshipObservation.getValues());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.Authors  = GetAuthorList(_ActentryrelationshipObservationentryrelationshipObservation.getAuthors());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.Code = GetCD(_ActentryrelationshipObservationentryrelationshipObservation.getCode());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.StatusCode = GetCS(_ActentryrelationshipObservationentryrelationshipObservation.getStatusCode());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.EffectiveTime = GetIVL_TS(_ActentryrelationshipObservationentryrelationshipObservation.getEffectiveTime());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.ClassCode = GetVocabInfo(_ActentryrelationshipObservationentryrelationshipObservation.getClassCode());
+			                                    		ActentryrelationshipObservationentryrelationshipObservation.MoodCode = GetVocabInfo(_ActentryrelationshipObservationentryrelationshipObservation.getMoodCode());
+			
+			                                    		ActentryrelationshipObservationentryrelationship.Observation = ActentryrelationshipObservationentryrelationshipObservation;
+                                						}
+                                						ActentryrelationshipObservationentryrelationship.TypeCode = GetVocabInfo(_Actentryrelationship.getTypeCode());
+                                						ActentryrelationshipObservationentryrelationships.push(ActentryrelationshipObservationentryrelationship);
+                            						}
+                        						}
+                                    		// End
+                                    		ActentryrelationshipObservation.EntryRelationships = ActentryrelationshipObservationentryrelationships;
+                                    		Actentryrelationship.Observation = ActentryrelationshipObservation;
+                                		}
+                                	Actentryrelationship.TypeCode = GetVocabInfo(_Actentryrelationship.getTypeCode());
+                                	Actentryrelationships.push(Actentryrelationship);
+                            }
+                        }
+
+                         	act.EntryRelationships = Actentryrelationships;
+                    	}
+                    	entry.Act = act;
+                         entry.TypeCode = GetVocabInfo(_entry.getTypeCode());
+                	}
+
+        entries.push(entry);
+            }
+        }
+    }
+    
+    section.Entries = entries;
+    section.ClassCode = GetVocabInfo(problemSection.getClassCode());
+    section.MoodCode = GetVocabInfo(problemSection.getMoodCode());
 }
 
-channelMap.put(&apos;Payer_Section&apos;,JSON.stringify(section));
-_section = null;
-_payerText=null;</script>
-        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
-        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.12.0">
-          <name>Map PatientId</name>
-          <sequenceNumber>1</sequenceNumber>
-          <enabled>false</enabled>
-          <script>channelMap.put(&apos;patientid&apos;,sourceMap.get(&apos;patientid&apos;));</script>
+channelMap.put(&apos;Problemsection&apos;, JSON.stringify(section));
+
+problemSection = null;
+_problemText = null;</script>
         </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
       </elements>
       <inboundTemplate encoding="base64"></inboundTemplate>
@@ -169,14 +207,18 @@ _payerText=null;</script>
           <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.12.0">
             <sequenceNumber>0</sequenceNumber>
             <enabled>true</enabled>
-            <script>//logger.info(&apos;Payer Section-&gt;Start:&apos;+DateUtil.getCurrentDate(&apos;yyyyMMddhhmmss&apos;));
-if($(&apos;Payer_Section&apos;).length()&gt;2)
+            <script>//logger.info(&apos;problem Section-&gt;Start:&apos;+DateUtil.getCurrentDate(&apos;yyyyMMddhhmmss&apos;));
+if($(&apos;Problemsection&apos;).length()&gt;2)
 {
-	PayorBundle($(&apos;Payer_Section&apos;),sourceMap.get(&apos;payerSectionText&apos;),$(&apos;patientid&apos;),sourceMap.get(&apos;bundleid&apos;));
+
+ConditionBundle($(&apos;Problemsection&apos;),sourceMap.get(&apos;problemText&apos;),$(&apos;patientid&apos;),sourceMap.get(&apos;bundleid&apos;));
+
 
 }
-//logger.info(&apos;Payer Section-&gt;End:&apos;+DateUtil.getCurrentDate(&apos;yyyyMMddhhmmss&apos;));
-channelMap.remove($(&apos;Payer_Section&apos;));</script>
+
+channelMap.remove($(&apos;Problemsection&apos;));
+
+//logger.info(&apos;problem Section-&gt;End:&apos;+DateUtil.getCurrentDate(&apos;yyyyMMddhhmmss&apos;));</script>
           </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
         </elements>
         <inboundTemplate encoding="base64"></inboundTemplate>
@@ -289,7 +331,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1669215963405</time>
+        <time>1669215933694</time>
         <timezone>Asia/Calcutta</timezone>
       </lastModified>
       <pruningSettings>
