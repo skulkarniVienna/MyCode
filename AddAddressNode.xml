@@ -1,0 +1,98 @@
+<codeTemplate version="3.12.0">
+  <id>ef8780c1-7d9b-4ef9-b607-802e1875626c</id>
+  <name>AddAddressNode</name>
+  <revision>10</revision>
+  <lastModified>
+    <time>1669276864225</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function AddAddressNode(arg1)
+{
+
+   importPackage(org.hl7.fhir.r4.model);
+   
+   var addresslist=[];
+
+   //logger.info(&apos;AddAddressNode-&gt;&apos;+typeof arg1);
+   for (var _a=0; _a &lt; arg1.length; _a++) 
+   {
+      addr=new Address();
+      var period=new Period();
+      var temaddr=arg1[_a];
+
+      if(temaddr.PostalAddress[0].Name!=&apos;&apos; &amp;&amp; MapAddressUse(temaddr.PostalAddress[0].Name)!=null)
+      {
+         addr.setUse(Address.AddressUse.valueOf(MapAddressUse(temaddr.PostalAddress[0].Name)))
+      }
+                            
+      if(temaddr.StreetAddressLines[0].ADXP_ST!=&apos;&apos;)
+      {
+         addr.addLine(temaddr.StreetAddressLines[0].ADXP_ST.trim());
+      }
+
+      if(temaddr.Cities[0].ADXP_ST!=&apos;&apos;)
+      {
+         addr.setCity(temaddr.Cities[0].ADXP_ST)
+      }
+
+      if(temaddr.States[0].ADXP_ST!=&apos;&apos;)
+      {
+         addr.setState(temaddr.States[0].ADXP_ST);
+      }
+                            
+      if(temaddr.PostalCodes[0].ADXP_ST!=&apos;&apos;)
+      {
+         addr.setPostalCode(temaddr.PostalCodes[0].ADXP_ST);
+      }
+
+      if(temaddr.Countries[0].ADXP_ST!=&apos;&apos;)
+      {
+         addr.setCountry(temaddr.Countries[0].ADXP_ST);
+      }
+
+      if(temaddr.UsablePeriods[0].hasOwnProperty(&apos;IVL_TS&apos;))
+      {
+          if(temaddr.UsablePeriods[0].IVL_TS.Low.TS.Value!=&apos;&apos;)
+         {
+            period.setStartElement(new DateTimeType(formatdate(temaddr.UsablePeriods[0].IVL_TS.Low.TS.Value)));
+            addr.setPeriod(period);
+         }
+
+         if(temaddr.UsablePeriods[0].IVL_TS.High.TS.Value!=&apos;&apos;)
+         {
+            period.setEndElement(new DateTimeType(formatdate(temaddr.UsablePeriods[0].IVL_TS.High.TS.Value)));
+            addr.setPeriod(period);
+         }
+      }
+     
+
+      addresslist.push(addr)
+   }
+
+   if(addresslist.length&gt;0)
+   {
+      return addresslist
+   }
+}
+
+</code>
+  </properties>
+</codeTemplate>

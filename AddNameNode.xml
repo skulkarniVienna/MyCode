@@ -1,0 +1,100 @@
+<codeTemplate version="3.12.0">
+  <id>76044826-2855-4c6d-a256-1c7beaff99e2</id>
+  <name>AddNameNode</name>
+  <revision>8</revision>
+  <lastModified>
+    <time>1669276780581</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function AddNameNode(arg1)
+{
+
+   importPackage(org.hl7.fhir.r4.model);
+   
+   var namelist=[];
+   for (var _n=0; _n &lt; arg1.length; _n++) 
+   {
+      var tempname=arg1[_n];
+      var name=new HumanName();
+      var period=new Period();
+
+      if(tempname.Families[0].ENXP_ST!=&apos;&apos;)
+      {
+         name.setFamily(tempname.Families[0].ENXP_ST)   
+      }
+      
+      if(tempname.Givens[0].ENXP_ST!=&apos;&apos;)
+      {
+         name.addGiven(tempname.Givens[0].ENXP_ST)   
+      }
+      
+                             
+      if(tempname.Givens[1] != null &amp;&amp; tempname.Givens[1] != undefined) 
+      {
+         name.addGiven(tempname.Givens[1].ENXP_ST);
+      }
+
+      if(tempname.EntityNameUses[0].Name!=&apos;&apos;)
+      {
+         name.setUse(HumanName.NameUse.valueOf(MapEntityNameUse(tempname.EntityNameUses[0].Name)));  
+      }
+
+      if(tempname.Prefixes[0].ENXP_ST!=&apos;&apos;)
+      {
+         name.addPrefix(tempname.Prefixes[0].ENXP_ST);  
+      }
+
+      if(tempname.Suffixes[0].ENXP_ST!=&apos;&apos;)
+      {
+         name.addSuffix(tempname.Suffixes[0].ENXP_ST);  
+      }
+
+      if(tempname.ValidTime.Low.TS.Value!=&apos;&apos;)
+      {
+      	logger.info(&apos;AddNameNode-&gt;&apos;+tempname.ValidTime.Low.TS.Value);
+      	logger.info(&apos;AddNameNode-&gt;&apos;+formatdate(tempname.ValidTime.Low.TS.Value));
+         period.setStartElement(new DateTimeType(formatdate(tempname.ValidTime.Low.TS.Value)));
+         //name.setPeriod(period)
+      }
+
+      if(tempname.ValidTime.High.TS.Value!=&apos;&apos;)
+      {
+         period.setEndElement(new DateTimeType(formatdate(tempname.ValidTime.High.TS.Value)));
+         //name.setPeriod(period)
+      }
+
+	if(period!=undefined &amp;&amp; period!=null)
+	{
+		name.setPeriod(period)
+	}
+     
+     namelist.push(name)
+   }
+
+   if(namelist.length&gt;0)
+   {
+      return namelist
+   }
+}
+
+</code>
+  </properties>
+</codeTemplate>
