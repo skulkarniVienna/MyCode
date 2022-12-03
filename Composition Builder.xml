@@ -3,7 +3,7 @@
   <nextMetaDataId>2</nextMetaDataId>
   <name>Composition Builder</name>
   <description></description>
-  <revision>75</revision>
+  <revision>95</revision>
   <sourceConnector version="3.12.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
@@ -98,6 +98,7 @@ var dbConn;
 try 
 {
     dbConn = DatabaseConnectionFactory.createDatabaseConnection(&apos;com.mysql.cj.jdbc.Driver&apos;,&apos;jdbc:mysql://localhost:3306/genzeon&apos;,&apos;root&apos;,&apos;test&apos;);
+
     
     var sql=&quot;SELECT resourcedata FROM requestinfo JOIN sourcedata ON requestinfo.requestinfoId=sourcedata.requestinfoId JOIN fhirresourcedata ON sourcedata.sourcedataid=fhirresourcedata.sourcedataid WHERE resourceType in(&apos;Composition&apos;,&apos;Patient&apos;) and requestinfo.bundleid=&apos;&quot;+msg[&apos;bundleid&apos;].toString()+&quot;&apos;&quot;;
     result = dbConn.executeCachedQuery(sql);
@@ -159,13 +160,37 @@ try
     composition.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(composition))));
     entrylist.unshift(new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent().setResource(patient));
     entrylist.unshift(new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent().setResource(composition));
+    
+    //Attachment logic
+    var attachmentsql=&quot;SELECT AttachmentData,Resourceid AS patientid FROM Attachments a JOIN sourcedata s ON s.RequestInfoId=a.RequestInfoId JOIN fhirresourcedata f ON f.Sourcedataid=s.SourceDataid AND resourceType=&apos;Patient&apos; WHERE a.requestinfoid=&apos;&quot;+msg[&apos;requestInfoid&apos;].toString()+&quot;&apos; ORDER BY f.FHIRResourceDataId DESC LIMIT 1;&quot;
+    channelMap.put(&apos;attachmentsql&apos;,attachmentsql);
+    var attachmentresult = dbConn.executeCachedQuery(attachmentsql);
+
+    while(attachmentresult.next())
+    {
+        var attachment=JSON.parse(attachmentresult.getString(&quot;AttachmentData&quot;));
+        var patientid=attachmentresult.getString(&quot;patientid&quot;);
+    }
+
+    	for(var _a=0;_a&lt;attachment[0].length;_a++)
+   	{
+   		var entry=new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent();
+       	var tempattachment=attachment[0][_a];
+       	entrylist.push(entry.setResource(DocumentReferenceResource(tempattachment,patientid)));
+       	
+        
+    	}
+    
+
+    
     bundle.setEntry(entrylist)
 
+	
     
     var updsql=&quot;update fhirresourcedata f JOIN sourcedata s ON s.SourceDataId=f.SourceDataId JOIN requestinfo r ON s.requestinfoid=r.requestinfoid set resourcedata=&apos;&quot;+JSON.parse(JSON.stringify(parser.encodeResourceToString(composition)).replace(/&apos;/g,&quot;\\\\&apos;&quot;))+&quot;&apos;,resourceId=&apos;&quot;+composition.getId()+&quot;&apos; WHERE resourceType=&apos;Composition&apos; and bundleid=&apos;&quot;+msg[&apos;bundleid&apos;].toString()+&quot;&apos;&quot;;
     var result = dbConn.executeUpdateAndGetGeneratedKeys(updsql);
 
-    var inssql=&quot;UPDATE sourcedata s JOIN requestinfo r ON s.requestinfoid=r.requestinfoid SET FHIRBundleData=&apos;&quot;+JSON.parse(JSON.stringify(parser.encodeResourceToString(bundle)).replace(/&apos;/g,&quot;\\\\&apos;&quot;))+&quot;&apos; WHERE bundleid=&apos;&quot;+msg[&apos;bundleid&apos;].toString()+&quot;&apos;&quot;;
+   var inssql=&quot;UPDATE sourcedata s JOIN requestinfo r ON s.requestinfoid=r.requestinfoid SET FHIRBundleData=&apos;&quot;+JSON.parse(JSON.stringify(parser.encodeResourceToString(bundle)).replace(/&apos;/g,&quot;\\\\&apos;&quot;))+&quot;&apos; WHERE bundleid=&apos;&quot;+msg[&apos;bundleid&apos;].toString()+&quot;&apos;&quot;;
     var result = dbConn.executeUpdateAndGetGeneratedKeys(inssql);
 }
 finally 
@@ -495,7 +520,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1669221456430</time>
+        <time>1670068919002</time>
         <timezone>Asia/Calcutta</timezone>
       </lastModified>
       <pruningSettings>
@@ -507,9 +532,9 @@ return;</undeployScript>
       <codeTemplateLibrary version="3.12.0">
         <id>37a60ffd-4008-4cda-b60f-31f4d20ba4ff</id>
         <name>HAPI FHIR Library</name>
-        <revision>128</revision>
+        <revision>130</revision>
         <lastModified>
-          <time>1669130240293</time>
+          <time>1670063368946</time>
           <timezone>Asia/Calcutta</timezone>
         </lastModified>
         <description></description>
@@ -547,17 +572,17 @@ return;</undeployScript>
           <codeTemplate version="3.12.0">
             <id>ef8780c1-7d9b-4ef9-b607-802e1875626c</id>
             <name>AddAddressNode</name>
-            <revision>9</revision>
+            <revision>10</revision>
             <lastModified>
-              <time>1668183288345</time>
+              <time>1669276864225</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -574,13 +599,14 @@ function AddAddressNode(arg1)
 {
 
    importPackage(org.hl7.fhir.r4.model);
-   var period=new Period();
+   
    var addresslist=[];
 
    //logger.info(&apos;AddAddressNode-&gt;&apos;+typeof arg1);
    for (var _a=0; _a &lt; arg1.length; _a++) 
    {
       addr=new Address();
+      var period=new Period();
       var temaddr=arg1[_a];
 
       if(temaddr.PostalAddress[0].Name!=&apos;&apos; &amp;&amp; MapAddressUse(temaddr.PostalAddress[0].Name)!=null)
@@ -644,17 +670,17 @@ function AddAddressNode(arg1)
           <codeTemplate version="3.12.0">
             <id>76044826-2855-4c6d-a256-1c7beaff99e2</id>
             <name>AddNameNode</name>
-            <revision>5</revision>
+            <revision>8</revision>
             <lastModified>
-              <time>1667469953350</time>
+              <time>1669276780581</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -671,12 +697,13 @@ function AddNameNode(arg1)
 {
 
    importPackage(org.hl7.fhir.r4.model);
-   var period=new Period();
+   
    var namelist=[];
    for (var _n=0; _n &lt; arg1.length; _n++) 
    {
       var tempname=arg1[_n];
       var name=new HumanName();
+      var period=new Period();
 
       if(tempname.Families[0].ENXP_ST!=&apos;&apos;)
       {
@@ -711,17 +738,24 @@ function AddNameNode(arg1)
 
       if(tempname.ValidTime.Low.TS.Value!=&apos;&apos;)
       {
+      	logger.info(&apos;AddNameNode-&gt;&apos;+tempname.ValidTime.Low.TS.Value);
+      	logger.info(&apos;AddNameNode-&gt;&apos;+formatdate(tempname.ValidTime.Low.TS.Value));
          period.setStartElement(new DateTimeType(formatdate(tempname.ValidTime.Low.TS.Value)));
-         name.setPeriod(period)
+         //name.setPeriod(period)
       }
 
       if(tempname.ValidTime.High.TS.Value!=&apos;&apos;)
       {
          period.setEndElement(new DateTimeType(formatdate(tempname.ValidTime.High.TS.Value)));
-         name.setPeriod(period)
+         //name.setPeriod(period)
       }
 
-      namelist.push(name)
+	if(period!=undefined &amp;&amp; period!=null)
+	{
+		name.setPeriod(period)
+	}
+     
+     namelist.push(name)
    }
 
    if(namelist.length&gt;0)
@@ -743,10 +777,10 @@ function AddNameNode(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -799,10 +833,10 @@ function AddTelecomNode(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -869,10 +903,10 @@ function AdvanceDirectiveBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -976,10 +1010,10 @@ function AdvanceDirectiveBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1042,10 +1076,10 @@ function AllergyIntoleranceBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1262,10 +1296,10 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1334,10 +1368,10 @@ function AuthortoOrganization(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1408,10 +1442,10 @@ function AuthortoPractictioner(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1504,10 +1538,10 @@ function AuthortoPractictionerRole(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1579,10 +1613,10 @@ function CareplanBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1698,10 +1732,10 @@ function CareplanMedicationRequest(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1810,10 +1844,10 @@ function CareplanMedicationRequest(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -1869,10 +1903,10 @@ function ConditionBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2037,10 +2071,10 @@ function ConditionResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2232,10 +2266,10 @@ function CoverageResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2341,6 +2375,93 @@ function DeviceResource(arg1,txt,patientid)
             </properties>
           </codeTemplate>
           <codeTemplate version="3.12.0">
+            <id>72b8c78d-c950-4c0d-9b27-907efdcb2470</id>
+            <name>DocumentReferenceResource</name>
+            <revision>11</revision>
+            <lastModified>
+              <time>1670068111518</time>
+              <timezone>Asia/Calcutta</timezone>
+            </lastModified>
+            <contextSet>
+              <delegate>
+                <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+                <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+                <contextType>DESTINATION_DISPATCHER</contextType>
+              </delegate>
+            </contextSet>
+            <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+              <type>FUNCTION</type>
+              <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function DocumentReferenceResource(arg1,patientid)
+{
+    
+    importPackage(org.hl7.fhir.r4.model);
+    var documentreference = new org.hl7.fhir.r4.model.DocumentReference();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    
+
+    if(arg1.clinicalItemKey!=&apos;&apos;)
+    {
+        documentreference.addIdentifier().setValue(arg1.clinicalItemKey);   
+    }
+    
+    documentreference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+    documentreference.setSubject(new Reference().setReference(patientid));
+
+    if(arg1.createdOn!=&apos;&apos;)
+    {
+        documentreference.setDateElement(InstantType(arg1.createdOn));
+    }
+
+
+    var content=new org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent();
+    var contentattachment=new org.hl7.fhir.r4.model.Attachment()
+
+    contentattachment.setDataElement(Base64BinaryType(arg1.data));
+    contentattachment.setTitle(arg1.label);
+    contentattachment.setContentType(arg1.mimeType);
+    content.setAttachment(contentattachment);
+    documentreference.addContent(content);
+    documentreference.setDescription(arg1.label);
+
+    var context=new org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent();
+    var period=new org.hl7.fhir.r4.model.Period();
+    
+    if(arg1.startTime!=&apos;&apos;)
+    {
+        period.setStartElement(DateTimeType(arg1.startTime));
+    }
+
+    if(arg1.endTime!=&apos;&apos;)
+    {
+        period.setEndElement(DateTimeType(arg1.endTime));
+    }
+    
+
+    
+    documentreference.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(documentreference))));
+    //var oDocumentReference=JSON.parse(parser.encodeResourceToString(documentreference));
+    //logger.info(&apos;documentreference-&gt;&apos;+parser.encodeResourceToString(documentreference));
+   
+
+
+    return documentreference;
+    
+
+}</code>
+            </properties>
+          </codeTemplate>
+          <codeTemplate version="3.12.0">
             <id>882e0d9b-fd8a-46ad-a4aa-916686cc0763</id>
             <name>EncounterBundle</name>
             <revision>6</revision>
@@ -2350,10 +2471,10 @@ function DeviceResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2403,10 +2524,10 @@ function DeviceResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2595,10 +2716,10 @@ function EncounterResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2703,10 +2824,10 @@ function ExternalDocumentReference(arg1,patientid,authenticator,custodian)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2770,10 +2891,10 @@ function FamilyMemberHistoryBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2883,10 +3004,10 @@ function FamilyMemberHistoryResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -2952,10 +3073,10 @@ function FunctionalStatusBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3024,10 +3145,10 @@ function GetCoding(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3103,10 +3224,10 @@ function GetCodingList(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3214,10 +3335,10 @@ function GetMergedCodeList(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3244,17 +3365,17 @@ function GetNarrative(arg1) {
           <codeTemplate version="3.12.0">
             <id>4ae44f57-065a-40e6-9f60-eac670162cc8</id>
             <name>GetPatientResource_hapi</name>
-            <revision>69</revision>
+            <revision>70</revision>
             <lastModified>
-              <time>1668945251757</time>
+              <time>1669271972958</time>
               <timezone>Asia/Calcutta</timezone>
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3298,28 +3419,8 @@ function GetNarrative(arg1) {
                     var _patientnamedetails = _recordTargets[_count].PatientRole.Patient.Names;
                     if (_patientnamedetails != null) 
                     {
-                        var _patientnamedetailsSize = _patientnamedetails.length;
-                        var _l = 0;
-                        if (_patientnamedetailsSize &gt; 0) 
-                        {
+                    	patient.setName(AddNameNode(_patientnamedetails))
                         
-                            for (; _l &lt; _patientnamedetailsSize; _l++) 
-                            {
-                                var pname=patient.addName();
-                                pname.setFamily(_patientnamedetails[_l].Families[0].ENXP_ST)
-                                pname.addGiven(_patientnamedetails[_l].Givens[0].ENXP_ST)
-                                
-                                if(_patientnamedetails[_l].Givens[1] != null &amp;&amp; _patientnamedetails[_l].Givens[1] != undefined) 
-                                {
-                                    pname.addGiven(_patientnamedetails[_l].Givens[1].ENXP_ST);
-                                }
-
-                                if(_patientnamedetails[_l].EntityNameUses[0].Name!=&apos;&apos;)
-                                {
-                                    pname.setUse(HumanName.NameUse.valueOf(MapEntityNameUse(_patientnamedetails[_l].EntityNameUses[0].Name)));  
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -3666,10 +3767,10 @@ function GetNarrative(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3728,10 +3829,10 @@ function GetQuantity(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3779,10 +3880,10 @@ function GetQuantity(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3823,10 +3924,10 @@ function GetSystem(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3917,10 +4018,10 @@ function GetValueNode(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -3984,10 +4085,10 @@ function ImmunizationBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4174,10 +4275,10 @@ function ImmunizationResource(arg1,txt,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4245,10 +4346,10 @@ function LocationResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4307,10 +4408,10 @@ function LocationResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4360,10 +4461,10 @@ function MapAllergyClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4411,10 +4512,10 @@ function MapAllergyCriticality(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4474,10 +4575,10 @@ function MapAllergySeverity(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4550,10 +4651,10 @@ function MapAllergyType(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4600,10 +4701,10 @@ function MapCareplanIntent(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4645,10 +4746,10 @@ function MapCareplanStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4698,10 +4799,10 @@ function MapConditionClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4739,10 +4840,10 @@ function MapConditionClinicalStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4791,10 +4892,10 @@ function MapDeviceStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4847,10 +4948,10 @@ function MapEncounterStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4898,10 +4999,10 @@ function MapEncounterStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -4939,10 +5040,10 @@ function MapEncounterStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5000,10 +5101,10 @@ function MapImmunizationStatus(arg1,negind)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5047,10 +5148,10 @@ function MapImmunizationStatus(arg1,negind)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5102,10 +5203,10 @@ function MapMedicationStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5158,10 +5259,10 @@ function MapParticipantType(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5217,10 +5318,10 @@ function MapParticipantType(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5267,10 +5368,10 @@ function MapProcedureStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5328,10 +5429,10 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5374,10 +5475,10 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5422,10 +5523,10 @@ function MapResultStatus(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5468,10 +5569,10 @@ function MapVerificationStatus(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5540,10 +5641,10 @@ function MedicalEquipmentBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -5608,10 +5709,10 @@ function MedicationBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6047,10 +6148,10 @@ function MedicationRequestResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6256,10 +6357,10 @@ function MedicationRequestResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6387,10 +6488,10 @@ function OrganizationResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6498,10 +6599,10 @@ function ParticipanttoOrganization(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6571,10 +6672,10 @@ function ParticipanttoPatient(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6639,10 +6740,10 @@ function ParticipanttoPractictioner(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6719,10 +6820,10 @@ function ParticipanttoRelatedPerson(arg1,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6787,10 +6888,10 @@ function PayorBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -6868,10 +6969,10 @@ function ProcedureBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7144,10 +7245,10 @@ function ProcedureResource(arg1,text,patientid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7221,10 +7322,10 @@ function ResultBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7351,10 +7452,10 @@ function ResultBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7425,10 +7526,10 @@ function ResultBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7495,10 +7596,10 @@ function SocialHistoryBundle(arg1,text,patientid,bundleid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7565,10 +7666,10 @@ function SpecimenResource(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7633,10 +7734,10 @@ function VitalBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7826,10 +7927,10 @@ function VitalBundle(arg1,text,patientid,bundleId)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -7997,10 +8098,10 @@ necessarily including all code templates on all channels all the time.</descript
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8035,10 +8136,10 @@ function checkdata(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8075,10 +8176,10 @@ function clean(obj)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8121,10 +8222,10 @@ for(var _c=0;_c&lt;Object.keys(str).length;_c++) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8203,10 +8304,10 @@ for(var _c=0;_c&lt;Object.keys(str).length;_c++) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8331,10 +8432,10 @@ function parseCCDBirthDate(str)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8403,10 +8504,10 @@ function GetAnyTypeFeatureMap(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8446,10 +8547,10 @@ function GetAnyTypeFeatureMap(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8489,10 +8590,10 @@ function Getcareteamid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8534,10 +8635,10 @@ function GetClinakosId()
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8597,10 +8698,10 @@ function GetEffectiveTimeInfo(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8636,10 +8737,10 @@ function GetHashValue(data)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8684,10 +8785,10 @@ function GetOrganizationid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8744,10 +8845,10 @@ function GetPerformerid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8787,10 +8888,10 @@ function GetRelatedPersonid(arg1,ptid)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8830,10 +8931,10 @@ function GetSupplyid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -8917,10 +9018,10 @@ function GetSupplyid(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9055,10 +9156,10 @@ function GetTimeandFrequency(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9171,10 +9272,10 @@ function getvaluenunit(arg1)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9529,10 +9630,10 @@ function safe_add (x, y)
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9571,10 +9672,10 @@ function mysql_real_escape_string (str) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9608,10 +9709,10 @@ function removeDuplicates(arr) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9661,10 +9762,10 @@ function replaceDiacritics(str){
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
@@ -9717,10 +9818,10 @@ function stripTZ(arg1) {
             </lastModified>
             <contextSet>
               <delegate>
-                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_RECEIVER</contextType>
+                <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
                 <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+                <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
                 <contextType>DESTINATION_DISPATCHER</contextType>
               </delegate>
             </contextSet>
