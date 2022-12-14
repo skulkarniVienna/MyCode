@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>1c07dcff-6262-4cca-88c8-91fa777c48b2</id>
   <name>CoverageResource</name>
-  <revision>50</revision>
+  <revision>52</revision>
   <lastModified>
-    <time>1670944300324</time>
+    <time>1671036115285</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -99,6 +99,12 @@ function CoverageResource(arg1,text,patientid)
                                 }
                                 
                             }
+                        }
+
+                        if(!payerorg.hasTelecom())
+                        {
+                            payerorg.setTelecom(AddTelecomNode(tempperformer.AssignedEntity.Telecoms));
+                            
                         }
                         coverage.addPayor(new Reference().setType(&apos;Organization&apos;).setDisplay(&apos;Payor&apos;).setReference(&apos;#&apos;+new Resource(payerorg.getId())))
                         coverage.addContained(payerorg)
