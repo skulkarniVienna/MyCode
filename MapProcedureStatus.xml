@@ -1,0 +1,50 @@
+<codeTemplate version="3.12.0">
+  <id>cd8ad885-3321-4beb-917e-bc08b48db952</id>
+  <name>MapProcedureStatus</name>
+  <revision>4</revision>
+  <lastModified>
+    <time>1670693886805</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function MapProcedureStatus(arg1)
+{
+   switch(String(arg1))
+   {
+      case &quot;aborted&quot;:
+         return &apos;STOPPED&apos;;
+         break;
+      case &quot;active&quot;:
+         return &apos;INPROGRESS&apos;;
+         break; 
+      case &quot;cancelled&quot;:
+         return &apos;STOPPED&apos;;
+         break; 
+      case &quot;completed&quot;:
+         return &apos;COMPLETED&apos;;
+         break;
+      
+      default:
+         return &apos;UNKNOWN&apos;;
+   }   
+   
+}</code>
+  </properties>
+</codeTemplate>
