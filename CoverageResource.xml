@@ -1,0 +1,219 @@
+<codeTemplate version="3.12.0">
+  <id>1c07dcff-6262-4cca-88c8-91fa777c48b2</id>
+  <name>CoverageResource</name>
+  <revision>50</revision>
+  <lastModified>
+    <time>1670944300324</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function CoverageResource(arg1,text,patientid)
+{
+    
+    
+    importPackage(org.hl7.fhir.r4.model);
+    var coverage = new org.hl7.fhir.r4.model.Coverage();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            coverage.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+        
+    }
+
+    if(text!=&apos;&apos; &amp;&amp; GetNarrative(text)!=null)
+    {
+        coverage.setText(GetNarrative(text))
+    }
+
+    coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+    coverage.setBeneficiary(new Reference().setReference(patientid));
+
+    
+
+    for(var _er1=0;_er1&lt;arg1.EntryRelationships.length;_er1++)
+    {
+        er1=arg1.EntryRelationships[_er1];
+
+        if(er1.SequenceNumber.Value!=&apos;&apos;)
+        {
+            coverage.setOrder(er1.SequenceNumber.Value);
+        }
+
+
+        if(er1.hasOwnProperty(&apos;Act&apos;))
+        {
+            if(er1.Act.Ids[0].Extension!=&apos;&apos;)
+            {
+                coverage.setSubscriberId(er1.Act.Ids[0].Extension);
+            }
+
+            coverage.setType(new CodeableConcept().setCoding(GetCodingList(er1.Act.Code)));
+
+            for(var _perf=0;_perf&lt;er1.Act.Performers.length;_perf++)
+            {
+                var tempperformer=er1.Act.Performers[_perf];
+
+                if(tempperformer.AssignedEntity.Code.Code==&apos;PAYOR&apos;)
+                {
+                    var payerorg=OrganizationResource(tempperformer.AssignedEntity.Organizations[0]);
+
+                
+                    
+
+                    if(payerorg!=undefined)
+                    {
+                        if(!payerorg.hasAddress())
+                        {
+                            payerorg.setAddress(AddAddressNode(tempperformer.AssignedEntity.Address))
+                        }
+
+                        if(!payerorg.hasIdentifier())
+                        {
+                            for(var _id=0;_id&lt;tempperformer.AssignedEntity.Ids.length;_id++)
+                            {
+                                if(tempperformer.AssignedEntity.Ids[_id].Extension!=&apos;&apos;)
+                                {
+                                    payerorg.addIdentifier().setSystem(GetSystem(tempperformer.AssignedEntity.Ids[_id].Root)).setValue(tempperformer.AssignedEntity.Ids[_id].Extension);   
+                                }
+                                
+                            }
+                        }
+                        coverage.addPayor(new Reference().setType(&apos;Organization&apos;).setDisplay(&apos;Payor&apos;).setReference(&apos;#&apos;+new Resource(payerorg.getId())))
+                        coverage.addContained(payerorg)
+                    }
+                }
+
+                if(tempperformer.AssignedEntity.Code.Code==&apos;GUAR&apos;)
+                {
+                    var relatedperson=ParticipanttoRelatedPerson(tempperformer.AssignedEntity);
+                    if(relatedperson!=undefined)
+                    {
+                        coverage.addPayor(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Guarantor&apos;).setReference(&apos;#&apos;+new Resource(relatedperson.getId())))
+                        coverage.addContained(relatedperson)
+                    }
+                }
+                
+            }
+
+            
+            for(var _p=0;_p&lt;er1.Act.Participants.length;_p++)
+            {
+                var tempparticipant=er1.Act.Participants[_p];
+
+                if(tempparticipant.TypeCode.Name==&apos;HLD&apos;)
+                {
+                    var relatedperson=ParticipanttoRelatedPerson(tempparticipant.ParticipantRole,patientid)
+                    if(relatedperson!=undefined)
+                    {
+                        coverage.addContained(relatedperson);    
+            
+                        coverage.setPolicyHolder(new Reference().setType(&apos;RelatedPerson&apos;).setDisplay(&apos;Policy Holder&apos;).setReference(&apos;#&apos;+new Resource(relatedperson.getId())));    
+                    }
+                    
+                }
+
+                if(tempparticipant.TypeCode.Name==&apos;COV&apos;)
+                {
+                    var subscriber=ParticipanttoPatient(tempparticipant.ParticipantRole)
+                    if(subscriber!=undefined)
+                    {
+                        coverage.addContained(subscriber);    
+            
+                        coverage.setSubscriber(new Reference().setType(&apos;Patient&apos;).setDisplay(&apos;Insured Person&apos;).setReference(&apos;#&apos;+new Resource(subscriber.getId())));    
+                    }
+
+                    if(tempparticipant.ParticipantRole.Code.Code!=&apos;&apos; || tempparticipant.ParticipantRole.Code.DisplayName!=&apos;&apos;)
+                    {
+                        coverage.setRelationship(new CodeableConcept().setCoding(GetCodingList(tempparticipant.ParticipantRole.Code)))
+                        
+                    }
+
+                    var period=new Period();
+                    if(tempparticipant.Time.Low.TS.Value!=&apos;&apos;)
+                    {
+                        period.setStartElement(new DateTimeType(formatdate(tempparticipant.Time.Low.TS.Value)));
+                        coverage.setPeriod(period);
+                    }
+
+                    if(tempparticipant.Time.High.TS.Value!=&apos;&apos;)
+                    {
+                        period.setEndElement(new DateTimeType(formatdate(tempparticipant.Time.High.TS.Value)));
+                        coverage.setPeriod(period);
+                    }
+                    
+                }
+            }
+
+
+            for(var _er2=0;_er2&lt;er1.Act.EntryRelationships.length;_er2++)
+            {
+                var er2=er1.Act.EntryRelationships[_er2];
+                if(er2.TypeCode.Name==&apos;REFR&apos; &amp;&amp; er2.Act.MoodCode.Name==&apos;DEF&apos;)
+                {
+                    if(er2.Act.Text.Text!=&apos;&apos;)
+                    {
+                        var classcomponent=org.hl7.fhir.r4.model.Coverage.ClassComponent();
+                        classcomponent.setType(new CodeableConcept().setText(&apos;Plan&apos;));
+                        classcomponent.setValue(er2.Act.Text.Text.trim());
+                        coverage.addClass_(classcomponent);
+                    }
+                }
+
+                for(var _er3=0;_er3&lt;er2.Act.EntryRelationships.length;_er3++)
+                {
+                    var er3=er2.Act.EntryRelationships[_er3];
+
+                    if(er3.hasOwnProperty(&apos;Procedure&apos;))
+                    {
+                        if(er3.Procedure.MoodCode.Name==&apos;PRMS&apos;)
+                        {
+                            if(er3.Procedure.Code.Code!=&apos;&apos; || er3.Procedure.Code.DisplayName!=&apos;&apos;)
+                            {
+                                coverage.addExtension().setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/prior-auth&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(er3.Procedure.Code)));
+                            }
+                        }
+                        
+                        
+                    }
+                }
+            }
+        }
+    }
+
+    coverage.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(coverage))));
+ //   var oCoverage=JSON.parse(parser.encodeResourceToString(coverage));
+    //logger.info(&apos;coverageResource-&gt;&apos;+parser.encodeResourceToString(coverage));
+   
+
+
+    
+    return coverage;
+
+
+    
+
+}</code>
+  </properties>
+</codeTemplate>
