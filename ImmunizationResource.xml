@@ -1,0 +1,311 @@
+<codeTemplate version="3.12.0">
+  <id>160024f7-3c07-446b-b49e-c682becff8ca</id>
+  <name>ImmunizationResource</name>
+  <revision>18</revision>
+  <lastModified>
+    <time>1670674077055</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function ImmunizationResource(arg1,txt,patientid)
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var immunization = new org.hl7.fhir.r4.model.Immunization();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            immunization.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }  
+    }
+
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+        immunization.setText(GetNarrative(txt))
+    }
+
+    immunization.setStatus(Immunization.ImmunizationStatus.valueOf(MapImmunizationStatus(arg1.StatusCode.Code,arg1.NegationIndicator)))
+    immunization.setVaccineCode(new CodeableConcept().setCoding(GetCodingList(arg1.Consumable.ManufacturedProduct.Material.Code)))
+    immunization.setPatient(new Reference().setReference(patientid));  
+
+    var tempdate=GetEffectiveTimeInfo(arg1);
+    immunization.setOccurrence(new DateTimeType(formatdate(tempdate.startdatetime)))
+    
+    if(arg1.Authors[0].Time.Value!=&apos;&apos;)
+    {
+        immunization.setRecordedElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
+    }
+
+    var tempmanufacturer=OrganizationResource(arg1.Consumable.ManufacturedProduct.Organization);
+    if(tempmanufacturer!=undefined)
+    {
+        immunization.addContained(tempmanufacturer);
+        immunization.setManufacturer(new Reference(&apos;#&apos;+new Resource(tempmanufacturer.getId())));    
+    }
+    
+
+    if(arg1.Consumable.ManufacturedProduct.Material.LotNumberText!=&apos;&apos;)
+    {
+        immunization.setLotNumber(arg1.Consumable.ManufacturedProduct.Material.LotNumberText);    
+    }
+    
+    if(arg1.ApproachSiteCodes!=null)
+    {
+        immunization.setSite(new CodeableConcept().setCoding(GetCodingList(arg1.ApproachSiteCodes)))    
+    }
+
+    if(arg1.RouteCode!=null)
+    {
+        immunization.setRoute(new CodeableConcept().setCoding(GetCodingList(arg1.RouteCode)))    
+    }
+
+    if(arg1.hasOwnProperty(&apos;AdministrationCode&apos;))
+    {
+        if(arg1.AdministrationCode.Code!=&apos;&apos; || arg1.AdministrationCode.DisplayName!=&apos;&apos;)
+        {
+            immunization.setRoute(new CodeableConcept().setCoding(GetCodingList(arg1.AdministrationCode)));   
+        }
+    }
+
+    if(arg1.DoseQuantity.SXCM_PQ.PQ.Value!=&apos;&apos;)
+    {
+        immunization.setDoseQuantity(GetQuantity(arg1.DoseQuantity.SXCM_PQ))
+    }
+    
+    if(arg1.Performers.length&gt;0)
+    {
+        if(arg1.Performers[0].TypeCode.Name==&apos;PRF&apos;)
+        {
+            var performer=new org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent();
+        
+            var tempactor=AuthortoPractictionerRole(arg1.Performers[0].AssignedEntity);
+            if(tempactor!= undefined)
+            {
+                immunization.addContained(tempactor);    
+                performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(tempactor.getId())));
+            }
+
+            var tempactorperson=AuthortoPractictioner(arg1.Performers[0].AssignedEntity);
+            if(tempactorperson!= undefined)
+            {
+                immunization.addContained(tempactorperson);
+            }
+
+            var tempactororg=AuthortoOrganization(arg1.Performers[0].AssignedEntity.Organizations[0]);
+                
+            if(tempactororg!= undefined)
+            {
+                immunization.addContained(tempactororg);
+            }
+
+            immunization.addPerformer(performer);
+        }
+    }
+
+
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.Informants.length;_i++)
+        {
+            
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[_i].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                var performer=new org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent();
+                performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+                immunization.addContained(tempasserter);    
+                immunization.addPerformer(performer);
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[_i].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                immunization.addContained(tempasserterperson);
+            }
+                                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[_i].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                immunization.addContained(tempasserterorg);
+            }   
+
+
+        }
+    }
+
+
+    /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                immunization.addContained(temprecorder);    
+                var performer=new org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent();
+                performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+                immunization.addPerformer(performer);
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                immunization.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                immunization.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+
+    if(arg1.MoodCode.Name==&apos;EVN&apos;)
+    {
+        if(arg1.RepeatNumber.Value.Value!=&apos;&apos;)
+        {
+            var dose=new org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent();
+            dose.setDoseNumber(new StringType(arg1.RepeatNumber.Value.Value))
+            immunization.addProtocolApplied(dose)
+        }
+    }
+    else if(arg1.MoodCode.Name==&apos;INT&apos;)
+    {
+        if(arg1.RepeatNumber.Value.Value!=&apos;&apos;)
+        {
+            var series=new org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent();
+            series.setSeriesDoses(new StringType(arg1.RepeatNumber.Value.Value))
+            immunization.addProtocolApplied(series)
+        }
+    }
+
+
+    for(var _i=0;_i&lt;arg1.EntryRelationships.length;_i++)
+    {
+        var er1=arg1.EntryRelationships[_i];
+        if(er1.hasOwnProperty(&apos;Observation&apos;))
+        {
+            if(er1.TypeCode.Name==&apos;RSON&apos; &amp;&amp; er1.Observation.TemplateIds==&apos;2.16.840.1.113883.10.20.22.4.19&apos;)
+            {
+                immunization.addReasonCode(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)));
+            }
+
+            if(er1.TypeCode.Name==&apos;RSON&apos; &amp;&amp; er1.Observation.TemplateIds==&apos;2.16.840.1.113883.10.20.22.4.53&apos;)
+            {
+                immunization.setStatusReason(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Code)));
+            }
+
+            if(er1.TypeCode.Name==&apos;CAUS&apos;)
+            {
+                var reaction=new org.hl7.fhir.r4.model.Immunization.ImmunizationReactionComponent();
+                var tempreaction=ObservationResource(er1.Observation);
+                if(tempreaction!=undefined)
+                {
+                    reaction.setDetail(new Reference().setReference(&apos;#&apos;+new Resource(tempreaction.getId())))
+                    immunization.addContained(tempreaction);
+                    immunization.addReaction(reaction)    
+                }
+                
+            }
+        }
+
+        if(er1.hasOwnProperty(&apos;Act&apos;))
+        {
+            if(er1.Act.Text.Text!=&apos;&apos;)
+            {
+                immunization.addNote(new Annotation().setText(er1.Act.Text.Text.trim()))
+            }
+            else if(er1.Act.Text.hasOwnProperty(&apos;Reference&apos;))
+            {
+                if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                {
+                    immunization.addNote(new Annotation().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()))
+                }
+            }
+        }
+
+        if(er1.hasOwnProperty(&apos;Encounter&apos;))
+        {
+             if(er1.TypeCode.Name==&apos;COMP&apos;)
+            {
+                if(er1.Encounter.Ids[0].Extension!=&apos;&apos;)
+                {
+                    immunization.setEncounter(new Reference().setIdentifier(new Identifier().setValue(er1.Encounter.Ids[0].Extension).setSystem(GetSystem(er1.Encounter.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+                }
+                
+            }
+        }
+
+        if(er1.hasOwnProperty(&apos;supply&apos;))
+        {
+            if(er1.supply.hasOwnProperty(&apos;Performers&apos;))
+            {
+                for(var _p=0;_p&lt;er1.supply.Performers.length;_p++)
+                {
+                    if(er1.supply.Performers[_p].TypeCode.Name==&apos;PRF&apos;)
+                    {
+                        var performer=new org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent();
+                    
+                        var tempactor=AuthortoPractictionerRole(er1.supply.Performers[_p].AssignedEntity);
+                        if(tempactor!= undefined)
+                        {
+                            immunization.addContained(tempactor);    
+                            performer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(tempactor.getId())));
+                            immunization.addPerformer(performer);
+                        }
+
+                        var tempactorperson=AuthortoPractictioner(er1.supply.Performers[_p].AssignedEntity);
+                        if(tempactorperson!= undefined)
+                        {
+                            immunization.addContained(tempactorperson);
+                        }
+
+                        var tempactororg=AuthortoOrganization(er1.supply.Performers[_p].AssignedEntity.Organizations[0]);
+                            
+                        if(tempactororg!= undefined)
+                        {
+                            immunization.addContained(tempactororg);
+                        }
+
+                        
+                    }
+                }
+            }
+           
+        }
+    }
+
+    immunization.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(immunization))));
+  //  var oImmunization=JSON.parse(parser.encodeResourceToString(immunization));
+//    logger.info(&apos;ImmunizationResource-&gt;&apos;+parser.encodeResourceToString(immunization));
+
+    return immunization;
+}
+</code>
+  </properties>
+</codeTemplate>
