@@ -1,0 +1,355 @@
+<codeTemplate version="3.12.0">
+  <id>5ff514fe-780e-4d24-a226-e0c5f7aac20a</id>
+  <name>EncounterResource</name>
+  <revision>76</revision>
+  <lastModified>
+    <time>1670665438179</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function EncounterResource(arg1,txt,patientid) 
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var encounter = new org.hl7.fhir.r4.model.Encounter();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            encounter.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+        
+    }
+   
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+            encounter.setText(GetNarrative(txt))
+        }
+      
+    encounter.setSubject(new Reference().setReference(patientid));
+    
+
+    
+    encounter.setStatus(Encounter.EncounterStatus.valueOf(MapEncounterStatus(arg1.StatusCode.Code)))    
+    
+    var codinglist=[];
+    var typelist=GetMergedCodeList(arg1.Code);
+    //logger.info(&apos;EncounterResource-&gt;&apos;+typelist);
+    for(var _type=0;_type&lt;typelist.length;_type++)
+    {
+        codinglist.push(CodeableConcept(GetCoding(typelist[_type])))
+        encounter.setType(codinglist);
+    }
+
+    //logger.info(&apos;Encounter Resource-&gt;:&apos;+JSON.stringify(typelist[0]));
+    if(typelist.length&gt;0)
+    {
+        encounter.setClass_(GetCoding(typelist[0]));    
+    }
+    else
+    {
+        encounter.setClass_(new Coding().setCode(&apos;Unknown&apos;).setDisplay(&apos;Unknown&apos;).setSystem(&apos;Unknown&apos;));
+    }
+    
+
+    for(var _p=0;_p&lt;arg1.Performers.length;_p++)
+    {   
+        var tempperformer=arg1.Performers[_p]
+        
+        if(tempperformer.TypeCode.Name!=&apos;LOC&apos;)
+        {
+                
+            var encounterparticipant=new org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent();
+                
+            var tempindividual=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+            if(tempindividual!= undefined)
+            {
+
+                encounter.addContained(tempindividual);    
+            
+                encounterparticipant.setIndividual(new Reference().setReference(&apos;#&apos;+new Resource(tempindividual.getId())));
+            }
+
+            var tempindividualperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+            if(tempindividualperson!= undefined)
+            {
+                encounter.addContained(tempindividualperson);
+            }
+            
+            var tempindividualorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+            if(tempindividualorg!= undefined)
+            {
+                encounter.addContained(tempindividualorg);
+            }
+
+            if(tempperformer.AssignedEntity.hasOwnProperty(&apos;Code&apos;))
+            {
+                //encounterparticipant.addType(CodeableConcept(MapParticipantType(tempperformer.TypeCode.Name)))  
+                if(tempperformer.AssignedEntity.Code.Code!=&apos;&apos;)
+                {
+                    encounterparticipant.addType(new CodeableConcept().setCoding(GetCodingList(tempperformer.AssignedEntity.Code)));    
+                }
+                
+            }   
+
+            encounter.addParticipant(encounterparticipant)
+        }
+    }//end of performer loop
+
+    
+
+     
+    var encdate=GetEffectiveTimeInfo(arg1);
+    
+    if(encdate.startdatetime!=&apos;&apos;)
+    {
+        var period=new Period();
+
+        period.setStartElement(new DateTimeType(formatdate(encdate.startdatetime)))
+
+        if(encdate.enddatetime!=&apos;&apos;)
+        {
+            period.setEndElement(new DateTimeType(formatdate(encdate.enddatetime)));
+        }
+        
+        encounter.setPeriod(period);
+    }
+
+    if(arg1.Priority.Code!=&apos;&apos;)
+    {
+        encounter.setPriority(CodeableConcept(GetCoding(arg1.Priority)))   
+    }
+      
+       
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.Informants.length;_i++)
+        {
+            
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[_i].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                var encounterparticipant=new org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent();
+                encounterparticipant.setIndividual(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+                encounter.addContained(tempasserter);    
+                encounter.addParticipant(encounterparticipant);
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[_i].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                encounter.addContained(tempasserterperson);
+            }
+                                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[_i].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                encounter.addContained(tempasserterorg);
+            }   
+
+
+        }
+    }
+
+
+    /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                encounter.addContained(temprecorder);    
+                var encounterparticipant=new org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent();
+                encounterparticipant.setIndividual(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+                encounter.addParticipant(encounterparticipant);
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                encounter.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                encounter.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+
+
+    if(arg1.hasOwnProperty(&apos;References&apos;))
+    {
+        for(var _r=0;_r&lt;arg1.References.length;_r++)
+        {
+            var tempreference=arg1.References[_r];
+            
+            var tempdocument=ExternalDocumentReference(tempreference,patientid,&apos;&apos;,&apos;&apos;);
+            if(tempdocument!=undefined)
+            {
+                encounter.addExtension(&apos;http://hl7.org/fhir/StructureDefinition/encounter-associatedDocument&apos;,new Reference().setReference(&apos;#&apos;+new Resource(tempdocument.getId())))
+                //encounter.addExtension();
+                encounter.addContained(tempdocument);    
+            }
+            
+        }    
+    }
+    
+    
+    
+    //loop through 1st entry relationship
+    for(var _e_er1=0;_e_er1&lt;arg1.EntryRelationships.length;_e_er1++)
+    {
+        var temp_e_er1=arg1.EntryRelationships[_e_er1];
+
+        //start of observation-reason
+        if(temp_e_er1.hasOwnProperty(&apos;Observation&apos;))
+        {
+            if(temp_e_er1.TypeCode.Name==&apos;RSON&apos;)
+            {
+                encounter.addReasonCode(CodeableConcept(GetCoding(temp_e_er1.Observation.Values[0].CD)));
+                
+                var reasonresource=ObservationConditionResource(temp_e_er1.Observation,patientid)
+                if(reasonresource!=undefined)
+                {
+                    encounter.addReasonReference(new Reference().setReference(&apos;#&apos;+new Resource(reasonresource.getId())));    
+                    encounter.addContained(reasonresource);
+
+                    if(temp_e_er1.Observation.hasOwnProperty(&apos;Informants&apos;))
+                    {
+                        if(temp_e_er1.Observation.Informants.length&gt;0)
+                        {
+                            var tempasserter=AuthortoPractictionerRole(temp_e_er1.Observation.Informants[0].AssignedEntity);
+                            if(tempasserter!= undefined)
+                            {
+                                encounter.addContained(tempasserter);    
+                            }
+
+                            var tempasserterperson=AuthortoPractictioner(temp_e_er1.Observation.Informants[0].AssignedEntity);
+                            if(tempasserterperson!= undefined)
+                            {
+                                encounter.addContained(tempasserterperson);
+                            }
+                                   
+                            var tempasserterorg= AuthortoOrganization(temp_e_er1.Observation.Informants[0].AssignedEntity.Organizations[0]);
+                            if(tempasserterorg!= undefined)
+                            {
+                                encounter.addContained(tempasserterorg);
+                            }   
+                        }
+
+                    }
+
+
+                    if(temp_e_er1.Observation.hasOwnProperty(&apos;Authors&apos;))
+                    {
+                        /Author Block Start/
+                        var temprecorder=AuthortoPractictionerRole(temp_e_er1.Observation.Authors[0].AssignedAuthor);
+                        if(temprecorder!= undefined)
+                        {
+                            encounter.addContained(temprecorder);    
+                        }
+
+
+                        var temprecorderperson=AuthortoPractictioner(temp_e_er1.Observation.Authors[0].AssignedAuthor);
+                        if(temprecorderperson!= undefined)
+                        {
+                            encounter.addContained(temprecorderperson);
+                        }
+                               
+                        var temprecorderorg= AuthortoOrganization(temp_e_er1.Observation.Authors[0].AssignedAuthor.Organization);
+                        if(temprecorderorg!= undefined)
+                        {
+                            encounter.addContained(temprecorderorg);
+                        }
+
+                       /Author Block End/   
+                    }
+                }
+                
+            }
+            
+            
+        }// end of observation-reason
+         
+        //Start of Act-diagnosis
+        if(temp_e_er1.hasOwnProperty(&apos;Act&apos;))
+        {
+              
+            for(var _a=0;_a&lt;temp_e_er1.Act.EntryRelationships.length;_a++)
+            {
+            
+                var tmp_condition=temp_e_er1.Act.EntryRelationships[_a];
+                var encounterdiagnosis=new org.hl7.fhir.r4.model.Encounter.DiagnosisComponent();
+
+                var tempdiag=ConditionResource(temp_e_er1.Act,txt,patientid);
+                if(tempdiag!=undefined)
+                {
+                    encounter.addContained(tempdiag);    
+                    encounterdiagnosis.setCondition(new Reference().setReference(&apos;#&apos;+new Resource(tempdiag.getId())));
+                    encounter.addDiagnosis(encounterdiagnosis);
+                }
+                
+                
+            }
+            
+        }// end of Act-diagnosis
+        
+    }//end of 1st entry relationship
+    
+    for(var _o=0;_o&lt;arg1.Participants.length&gt;0;_o++)
+    {
+        var temppart=arg1.Participants[_o];
+        if(temppart.TypeCode.Name==&apos;LOC&apos;)
+        {
+            var tempprovider=ParticipanttoOrganization(temppart.ParticipantRole);
+            if(tempprovider!=undefined)
+            {
+                encounter.addContained(tempprovider);    
+                encounter.setServiceProvider(new Reference().setReference(&apos;#&apos;+new Resource(tempprovider.getId())));      
+                encounter.addLocation().setLocation(new Reference().setReference(&apos;#&apos;+new Resource(tempprovider.getId())));      
+            }
+            
+        }
+        
+    }
+      
+    
+
+    
+   encounter.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(encounter))));
+   // var oEncounter=JSON.parse(parser.encodeResourceToString(encounter));
+   // logger.info(&apos;EncounterResource-&gt;&apos;+parser.encodeResourceToString(encounter));
+
+    return encounter;
+      
+}
+    
+</code>
+  </properties>
+</codeTemplate>
