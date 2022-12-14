@@ -1,0 +1,303 @@
+<codeTemplate version="3.12.0">
+  <id>b9b28fe5-409d-4012-9e9b-d9d9b6980433</id>
+  <name>ProcedureResource</name>
+  <revision>20</revision>
+  <lastModified>
+    <time>1670694296620</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function ProcedureResource(arg1,text,patientid)
+{
+    
+    importPackage(org.hl7.fhir.r4.model);
+    var procedure = new org.hl7.fhir.r4.model.Procedure();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    //logger.info(&apos;ProcedureResource-&gt;&apos;+JSON.stringify(arg1));
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            procedure.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+        
+    }
+
+    if(text!=&apos;&apos; &amp;&amp; GetNarrative(text)!=null)
+    {
+        procedure.setText(GetNarrative(text))
+    }
+
+    procedure.setStatus(Procedure.ProcedureStatus.valueOf(MapProcedureStatus(arg1.StatusCode.Code)))
+    
+    procedure.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+    procedure.setSubject(new Reference().setReference(patientid));    
+
+    var tempdate=GetEffectiveTimeInfo(arg1);
+
+    if(tempdate.startdatetime!=&apos;&apos; &amp;&amp; tempdate.enddatetime!=&apos;&apos;)
+    {
+      var period=new Period();
+      period.setStartElement(new DateTimeType(formatdate(tempdate.startdatetime)));
+      period.setEndElement(new DateTimeType(formatdate(tempdate.enddatetime)));
+      procedure.setPerformed(period)
+    }  
+    else if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        procedure.setPerformed(new DateTimeType(formatdate(tempdate.startdatetime)))
+    }
+
+
+    if(arg1.hasOwnProperty(&apos;EffectiveTime&apos;))
+    {
+        if(arg1.EffectiveTime.hasOwnProperty(&apos;Width&apos;))
+        {
+            if(arg1.EffectiveTime.Width.Value!=&apos;&apos;)
+            {
+                procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/StructureDefinition/procedure-duration&apos;).setValue(new Duration().setValue(arg1.EffectiveTime.Width.Value).setUnit(arg1.EffectiveTime.Width.Unit))
+            }
+        }
+    }
+
+   /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                procedure.addContained(temprecorder);    
+                var procedureperformer=new org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent();
+                procedureperformer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+                
+
+                if(arg1.Authors[_a].FunctionCode.Code!=&apos;&apos;)
+                {
+                    procedureperformer.setFunction(new CodeableConcept().setCoding(GetCodingList(arg1.Authors[_a].FunctionCode)));
+                }
+
+                procedure.addPerformer(procedureperformer);
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                procedure.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                procedure.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+
+
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        /Informant Block Start/
+        var tempasserter=AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity);
+        if(tempasserter!= undefined)
+        {
+            procedure.addContained(tempasserter);    
+            procedure.setAsserter(new Reference().setType(&apos;PractitionerRole&apos;).setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+
+        }
+
+      
+        var tempasserterperson=AuthortoPractictioner(arg1.Informants[0].AssignedEntity);
+        if(tempasserterperson!= undefined)
+        {
+            procedure.addContained(tempasserterperson);
+        }
+               
+        var tempasserterorg=AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]);
+        if(tempasserterorg!= undefined)
+        {
+            procedure.addContained(tempasserterorg);
+        }
+        /Informant Block End/
+
+   }
+
+   if(arg1.hasOwnProperty(&apos;TargetSiteCodes&apos;))
+   {
+        for(var _t=0;_t&lt;arg1.TargetSiteCodes.length;_t++)
+        {
+            var target=arg1.TargetSiteCodes[_t];
+            procedure.addBodySite(new CodeableConcept().setCoding(GetCodingList(target)));
+        }
+
+   }
+   
+
+   if(arg1.hasOwnProperty(&apos;Specimens&apos;))
+   {
+        for(var _s=0;_s&lt;arg1.Specimens.length;_s++)
+       {
+            var specimen=arg1.Specimens[_s];
+
+            procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/extension-procedure-specimen&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(specimen.SpecimenRole.SpecimenPlayingEntity.Code)));
+
+       }
+   }
+   
+
+   if(arg1.hasOwnProperty(&apos;MethodCodes&apos;))
+   {
+        for(var _m=0;_m&lt;arg1.MethodCodes.length;_m++)
+        {
+            var method=arg1.MethodCodes[_m];
+            procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-method.html&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(method)));
+        }
+   }
+
+   if(arg1.hasOwnProperty(&apos;PriorityCode&apos;))
+   {
+        procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-priority.html&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(arg1.PriorityCode)));
+        
+   }
+   
+
+
+    for(var _perf=0;_perf&lt;arg1.Performers.length;_perf++)
+    {
+        var tempperformer=arg1.Performers[_perf];
+
+        /Performer Block Start/
+        var _tempperformer=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+        if(_tempperformer!= undefined)
+        {
+            procedure.addContained(_tempperformer);    
+            procedure.addPerformer(new org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent().setActor(new Reference().setType(&apos;PractitionerRole&apos;).setReference(&apos;#&apos;+new Resource(_tempperformer.getId()))));
+
+            
+        }
+
+        
+        var tempperformerperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+        if(tempperformerperson!= undefined)
+        {
+            procedure.addContained(tempperformerperson);
+        }
+                
+        var tempperformerorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+        if(tempperformerorg!= undefined)
+        {
+            procedure.addContained(tempperformerorg);
+        }
+
+        /Performer Block End/
+        
+   }
+
+    for(var _i=0;_i&lt;arg1.Participants.length;_i++)
+    {
+        var tempparticipant1=arg1.Participants[_i];
+        if(tempparticipant1.TypeCode.Name==&apos;LOC&apos; &amp;&amp; (tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;SDLOC&apos; || tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;PLC&apos;))
+        {
+            var templocation=LocationResource(tempparticipant1.ParticipantRole);
+            if(templocation!=undefined)
+            {
+                procedure.setLocation(new Reference().setType(&apos;Location&apos;).setReference(&apos;#&apos;+new Resource(templocation.getId())));
+                procedure.addContained(templocation)
+            }
+        }
+
+        if(tempparticipant1.TypeCode.Name==&apos;DEV&apos; &amp;&amp; tempparticipant1.ParticipantRole.RoleClassRoot.Name==&apos;MANU&apos;)
+        {
+            var tempdevice=DeviceResource(tempparticipant1.ParticipantRole,null,patientid);
+            if(tempdevice!=undefined)
+            {
+                procedure.addFocalDevice(new org.hl7.fhir.r4.model.Procedure.ProcedureFocalDeviceComponent().setManipulated(&apos;#&apos;+new Resource(tempdevice.getId())));
+                procedure.addContained(tempdevice)
+            }
+        }
+    }
+
+
+
+
+    for(var _er1=0;_er1&lt;arg1.EntryRelationships.length;_er1++)
+    {
+        er1=arg1.EntryRelationships[_er1];
+
+
+        if(er1.hasOwnProperty(&apos;Act&apos;))
+        {
+            if(er1.TypeCode.Name==&apos;SUBJ&apos; &amp;&amp; er1.Act.MoodCode.Name==&apos;INT&apos;)
+            {
+                if(er1.Act.Text.Text!=&apos;&apos;)
+                {
+                    procedure.addNote().setText(er1.Act.Text.Text.trim()) ;
+                }
+                else if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                {
+                    procedure.addNote().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()) ;
+                }
+            }
+        }
+
+        if(er1.hasOwnProperty(&apos;Encounter&apos;))
+        {
+             if(er1.TypeCode.Name==&apos;COMP&apos;)
+            {
+                if(er1.Encounter.Ids[0].Extension!=&apos;&apos;)
+                {
+                    procedure.setEncounter(new Reference().setIdentifier(new Identifier().setValue(er1.Encounter.Ids[0].Extension).setSystem(GetSystem(er1.Encounter.Ids[0].Root))).setType(&apos;Encounter&apos;)); 
+                }
+                
+            }
+        }
+
+        if(er1.hasOwnProperty(&apos;Observation&apos;))
+        {
+            if(er1.TypeCode.Name==&apos;RSON&apos;)
+            {
+                procedure.addReasonCode(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)))
+            }
+
+            if(er1.TypeCode.Name==&apos;COMP&apos;)
+            {
+                procedure.addComplication(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)))
+            }
+        }
+    }
+
+    procedure.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(procedure))));
+ //   var oProcedure=JSON.parse(parser.encodeResourceToString(procedure));
+    //logger.info(&apos;procedureResource-&gt;&apos;+parser.encodeResourceToString(procedure));
+   
+
+
+    return procedure;
+    
+
+}</code>
+  </properties>
+</codeTemplate>

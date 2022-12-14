@@ -1,0 +1,78 @@
+<codeTemplate version="3.12.0">
+  <id>49c09f37-1021-4fba-91cf-b2831e762f84</id>
+  <name>SpecimenResource</name>
+  <revision>3</revision>
+  <lastModified>
+    <time>1670675021816</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function SpecimenResource(arg1)
+{
+   //Takes input from SpecimenRole Node
+   importPackage(org.hl7.fhir.r4.model);
+   var specimen = new org.hl7.fhir.r4.model.Specimen();
+   var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+   var parser = ctx.newJsonParser();
+
+   for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+   {
+      if(arg1.Ids[_id].Extension!=&apos;&apos;)
+      {
+         specimen.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+      }
+   }
+
+   if(GetCodingList(arg1.SpecimenPlayingEntity.Code).length&gt;0)
+   {
+      specimen.setType(new CodeableConcept().setCoding(GetCodingList(arg1.SpecimenPlayingEntity.Code)));   
+   }
+   
+
+   if(arg1.SpecimenPlayingEntity.hasOwnProperty(&apos;Quantities&apos;))
+   {
+      if(arg1.SpecimenPlayingEntity.Quantities.length&gt;0)
+      {
+         if(arg1.SpecimenPlayingEntity.Quantities[0].Value!=&apos;&apos;)
+         {
+            specimen.setCollection(new org.hl7.fhir.r4.model.Specimen.SpecimenCollectionComponent().setQuantity(GetQuantity(arg1.SpecimenPlayingEntity.Quantities[0])));         
+         }
+      }
+   }
+
+   if(arg1.SpecimenPlayingEntity.hasOwnProperty(&apos;Desc&apos;))
+   {
+        if(arg1.SpecimenPlayingEntity.Desc.Text.trim()!=&apos;&apos;)
+        {
+            specimen.addNote(new Annotation().setText(arg1.SpecimenPlayingEntity.Desc.Text.trim()));
+        }
+   }
+
+   specimen.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(specimen))));
+   
+   
+   if(countkey(parser.encodeResourceToString(specimen))&gt;2)
+   {
+      return specimen
+   }
+   
+}</code>
+  </properties>
+</codeTemplate>

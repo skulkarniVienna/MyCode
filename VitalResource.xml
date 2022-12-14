@@ -1,0 +1,207 @@
+<codeTemplate version="3.12.0">
+  <id>be554cb7-0d13-4069-ab40-4c2ac5ac4bb2</id>
+  <name>VitalResource</name>
+  <revision>22</revision>
+  <lastModified>
+    <time>1670677165238</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function VitalResource(arg1,txt,patientid)
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var observation = new org.hl7.fhir.r4.model.Observation();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+   
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            observation.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }  
+    }
+
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+        observation.setText(GetNarrative(txt))
+    }
+
+    observation.setStatus(Observation.ObservationStatus.FINAL);
+
+   
+    observation.addCategory(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+   
+   
+    observation.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+    observation.setSubject(new Reference().setReference(patientid));    
+
+    var tempdate=GetEffectiveTimeInfo(arg1);
+    if(tempdate.startdatetime!=&apos;&apos; &amp;&amp; tempdate.enddatetime!=&apos;&apos;)
+    {
+        observation.setEffective(new Period().setStartElement(new DateTimeType(formatdate(tempdate.startdatetime))).setEndElement(new DateTimeType(formatdate(tempdate.enddatetime))))
+    }
+    else if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        observation.setEffective(new DateTimeType(formatdate(tempdate.startdatetime)));
+    }
+
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.Informants.length;_i++)
+        {
+            
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[_i].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                observation.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+                observation.addContained(tempasserter);    
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[_i].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                observation.addContained(tempasserterperson);
+            }
+                                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[_i].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                observation.addContained(tempasserterorg);
+            }   
+
+
+        }
+    }
+
+
+    /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                observation.addContained(temprecorder);    
+                observation.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                observation.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                observation.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+
+
+   
+   
+   for(var _comp=0;_comp&lt;arg1.Components.length&gt;0;_comp++)
+   {
+      var tempcomp=arg1.Components[_comp];
+      if(tempcomp.hasOwnProperty(&apos;Observation&apos;))
+      {
+       
+        var tempcomponent=VitalComponent(tempcomp.Observation,patientid);
+        if(tempcomponent!=undefined)
+        {
+
+            var observationid=new Reference(&apos;#&apos;+new Resource(tempcomponent.getId()));
+            observation.addHasMember(observationid);
+            observation.addContained(tempcomponent) ;
+
+            if(tempcomp.Observation.hasOwnProperty(&apos;Informants&apos;))
+            {
+                for(var _i=0;_i&lt;tempcomp.Observation.Informants.length;_i++)
+                {
+                    
+                    var tempasserter=AuthortoPractictionerRole(tempcomp.Observation.Informants[_i].AssignedEntity);
+                    if(tempasserter!= undefined)
+                    {
+                        observation.addContained(tempasserter);    
+                    }
+
+                    var tempasserterperson=AuthortoPractictioner(tempcomp.Observation.Informants[_i].AssignedEntity);
+                    if(tempasserterperson!= undefined)
+                    {
+                        observation.addContained(tempasserterperson);
+                    }
+                                           
+                    var tempasserterorg= AuthortoOrganization(tempcomp.Observation.Informants[_i].AssignedEntity.Organizations[0]);
+                    if(tempasserterorg!= undefined)
+                    {
+                        observation.addContained(tempasserterorg);
+                    }   
+
+
+                }
+            }
+
+            /Author Block Start/
+            if(tempcomp.Observation.hasOwnProperty(&apos;Authors&apos;))
+            {
+                for(var _a=0;_a&lt;tempcomp.Observation.Authors.length;_a++)
+                {
+
+                    var temprecorder=AuthortoPractictionerRole(tempcomp.Observation.Authors[_a].AssignedAuthor);
+                    if(temprecorder!= undefined)
+                    {
+                        observation.addContained(temprecorder);    
+                    }
+
+                    var temprecorderperson=AuthortoPractictioner(tempcomp.Observation.Authors[_a].AssignedAuthor);
+                    if(temprecorderperson!= undefined)
+                    {
+                        observation.addContained(temprecorderperson);
+                    }
+                                           
+                    var temprecorderorg= AuthortoOrganization(tempcomp.Observation.Authors[_a].AssignedAuthor.Organization);
+                    if(temprecorderorg!= undefined)
+                    {
+                        observation.addContained(temprecorderorg);
+                    }
+                }
+                 
+            }
+             /Author Block End/      
+        } 
+
+        
+        
+      }
+      
+ 
+   }
+
+
+    observation.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(observation))));
+ //   var oObservation=JSON.parse(parser.encodeResourceToString(observation));
+    //logger.info(&apos;ObservationResource-&gt;&apos;+parser.encodeResourceToString(observation));
+
+    return observation;
+   
+
+}</code>
+  </properties>
+</codeTemplate>

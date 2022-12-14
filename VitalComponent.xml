@@ -1,0 +1,245 @@
+<codeTemplate version="3.12.0">
+  <id>9eacf259-f72c-4aeb-9c1a-3d22b3c56a30</id>
+  <name>VitalComponent</name>
+  <revision>38</revision>
+  <lastModified>
+    <time>1670676355428</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function VitalComponent(arg1,patientid)
+{
+   importPackage(org.hl7.fhir.r4.model);
+    var observation = new org.hl7.fhir.r4.model.Observation();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+   
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            observation.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }  
+    }
+
+    
+
+   observation.setStatus(Observation.ObservationStatus.FINAL);
+
+ 
+   
+   //logger.info(&apos;ObservationResource 2&apos;);
+   observation.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+   observation.setSubject(new Reference().setReference(patientid));    
+
+   var tempdate=GetEffectiveTimeInfo(arg1);
+   //logger.info(&apos;VitalComponent-&gt;&apos;+JSON.stringify(tempdate))
+   if(tempdate.startdatetime!=&apos;&apos; &amp;&amp; tempdate.enddatetime!=&apos;&apos;)
+   {
+      observation.setEffective(new Period().setStartElement(new DateTimeType(formatdate(tempdate.startdatetime))).setEndElement(new DateTimeType(formatdate(tempdate.enddatetime))))
+   }
+   else if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        observation.setEffective(new DateTimeType(formatdate(tempdate.startdatetime)));
+    }
+
+
+   if(arg1.hasOwnProperty(&apos;Values&apos;)) 
+   {
+      for(var _v=0;_v&lt;arg1.Values.length;_v++)
+      {
+        
+        var tempval=GetValueElement(arg1.Values[_v]);
+        if(tempval!=undefined)
+        {
+            observation.setValue(tempval);          
+        }
+        
+      }
+      
+   }
+   
+    
+    //var component=org.hl7.fhir.r4.model.Observation.ObservationComponentComponent();
+
+    if(arg1.hasOwnProperty(&apos;InterpretationCode&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.InterpretationCode.length;_i++)
+        {
+            var tempinterpretation=arg1.InterpretationCode[_i];
+              
+            if(GetCodingList(tempinterpretation).length&gt;0)
+            {
+                //component.addInterpretation(new CodeableConcept().setCoding(GetCodingList(tempinterpretation)))
+                observation.addInterpretation(new CodeableConcept().setCoding(GetCodingList(tempinterpretation)))
+            }
+        }
+            
+    }
+
+
+    if(arg1.hasOwnProperty(&apos;RefrenceRanges&apos;))
+    {  
+        for(var _r=0;_r&lt;arg1.RefrenceRanges.length;_r++)
+        {
+            var temprefrange=arg1.RefrenceRanges[_r];
+            var referencerange=new org.hl7.fhir.r4.model.Observation.ObservationReferenceRangeComponent();
+
+            if(temprefrange.ObservationRange.hasOwnProperty(&apos;Text&apos;))
+            {
+                if(temprefrange.ObservationRange.Text.Text!=&apos;&apos;)
+                {
+                    referencerange.setText(temprefrange.ObservationRange.Text.Text.trim());  
+                }
+                else if(temprefrange.ObservationRange.Text.hasOwnProperty(&apos;Reference&apos;))
+                {
+                    if(temprefrange.ObservationRange.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                    {
+                        referencerange.setText(temprefrange.ObservationRange.Text.Reference.TEL_URL.Value.trim());
+                    }
+                }
+
+                if(temprefrange.ObservationRange.hasOwnProperty(&apos;ANY&apos;))
+                {
+                    referencerange.setLow(GetQuantity(temprefrange.ObservationRange.ANY.IVL_PQ.Low.PQ));
+                    referencerange.setHigh(GetQuantity(temprefrange.ObservationRange.ANY.IVL_PQ.High.PQ));    
+                }
+                
+                  
+            }
+
+        }
+    }
+   
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.Informants.length;_i++)
+        {
+            
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[_i].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                observation.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+                observation.addContained(tempasserter);    
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[_i].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                observation.addContained(tempasserterperson);
+            }
+                                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[_i].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                observation.addContained(tempasserterorg);
+            }   
+
+
+        }
+    }
+
+
+    /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                observation.addContained(temprecorder);    
+                observation.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                observation.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                observation.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+
+
+
+    /*
+    if(component!=undefined)
+    {
+        observation.addComponent(component);    
+    }
+	*/
+    if(referencerange!=undefined)
+    {
+        observation.addReferenceRange(referencerange);    
+    }
+    
+    
+
+
+    for(var _er1=0;_er1&lt;arg1.EntryRelationships.length;_er1++)
+    {
+        var er1=arg1.EntryRelationships[_er1];
+
+         if(er1.hasOwnProperty(&apos;encounter&apos;))
+         {
+             if(er1.TypeCode.Name==&apos;COMP&apos;)
+            {
+                if(er1.encounter.Ids[0].Extension!=&apos;&apos;)
+                {
+                    observation.setEncounter(new Reference().setIdentifier(new Identifier().setValue(er1.encounter.Ids[0].Extension).setSystem(GetSystem(er1.encounter.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+                }
+                
+            }
+         }
+
+         if(er1.hasOwnProperty(&apos;Act&apos;))
+         {   
+            //Patient Instruction
+            if(er1.TypeCode.Name==&apos;SUBJ&apos;)
+            {
+                if(er1.Act.Text.Text!=&apos;&apos;)
+                {
+                  observation.addNote().setText(er1.Act.Text.Text.trim()) ;
+                }
+                else if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                {
+                  observation.addNote().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()) ;
+                }
+            }
+         }
+
+
+
+    }
+  
+
+
+   observation.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(observation))));
+   if(countkey(parser.encodeResourceToString(observation))&gt;2)
+   {
+    
+        return observation
+   }
+
+}</code>
+  </properties>
+</codeTemplate>

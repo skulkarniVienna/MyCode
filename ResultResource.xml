@@ -1,0 +1,191 @@
+<codeTemplate version="3.12.0">
+  <id>bb55803a-fefe-4bb1-b9dc-aabbd5db0033</id>
+  <name>ResultResource</name>
+  <revision>17</revision>
+  <lastModified>
+    <time>1670675311341</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function ResultResource(arg1,txt,patientid)
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var diagnosticreport = new org.hl7.fhir.r4.model.DiagnosticReport();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+   
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            diagnosticreport.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }  
+    }
+
+    /*
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+        diagnosticreport.setText(GetNarrative(txt))
+    }
+*/
+    diagnosticreport.setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(MapResultStatus(arg1.StatusCode.Code)));
+
+    diagnosticreport.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+    diagnosticreport.setSubject(new Reference().setReference(patientid));    
+
+    var tempdate=GetEffectiveTimeInfo(arg1);
+    if(tempdate.startdatetime!=&apos;&apos; &amp;&amp; tempdate.enddatetime!=&apos;&apos;)
+    {
+        diagnosticreport.setEffective(new Period().setStartElement(new DateTimeType(formatdate(tempdate.startdatetime))).setEndElement(new DateTimeType(formatdate(tempdate.enddatetime))))
+    }
+    else if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        diagnosticreport.setEffective(new DateTimeType(formatdate(tempdate.startdatetime)));
+    }
+
+    if(arg1.hasOwnProperty(&apos;Specimens&apos;))
+    {
+        for(var _s=0;_s&lt;arg1.Specimens.length;_s++)
+        {
+            var tempspecimen=arg1.Specimens[_s];
+
+            var tempspecimen=SpecimenResource(tempspecimen.SpecimenRole);
+            if(tempspecimen!=undefined)
+            {
+                diagnosticreport.addSpecimen(new Reference().setReference(&apos;#&apos;+new Resource(tempspecimen.getId())));  
+                diagnosticreport.addContained(tempspecimen)
+
+            }
+            
+        }    
+    }
+
+
+    /*
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+      if(arg1.Informants[0].AssignedEntity.Organizations.length&gt;0)
+      {
+        if(arg1.Informants[0].AssignedEntity.Organizations[0].Names.length&gt;0)
+        {
+            if(arg1.Informants[0].AssignedEntity.Organizations[0].Names[0].Text!=&apos;&apos;)
+            {
+                diagnosticreport.addPerformer(new Reference().setDisplay(arg1.Informants[0].AssignedEntity.Organizations[0].Names[0].Text.trim()))
+            }
+        }
+      }
+
+    }
+
+    */
+
+
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        for(var _i=0;_i&lt;arg1.Informants.length;_i++)
+        {
+            
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[_i].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                diagnosticreport.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+                diagnosticreport.addContained(tempasserter);    
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[_i].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                diagnosticreport.addContained(tempasserterperson);
+            }
+                                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[_i].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                diagnosticreport.addContained(tempasserterorg);
+            }   
+
+
+        }
+    };
+
+
+    /Author Block Start/
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+        for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+        {
+
+            var temprecorder=AuthortoPractictionerRole(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorder!= undefined)
+            {
+                diagnosticreport.addContained(temprecorder);    
+                diagnosticreport.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+            }
+
+            var temprecorderperson=AuthortoPractictioner(arg1.Authors[_a].AssignedAuthor);
+            if(temprecorderperson!= undefined)
+            {
+                diagnosticreport.addContained(temprecorderperson);
+            }
+                                   
+            var temprecorderorg= AuthortoOrganization(arg1.Authors[_a].AssignedAuthor.Organization);
+            if(temprecorderorg!= undefined)
+            {
+                diagnosticreport.addContained(temprecorderorg);
+            }
+        }
+         
+    }
+     /Author Block End/   
+   
+   if(arg1.hasOwnProperty(&apos;Components&apos;))
+   {
+        for(var _comp=0;_comp&lt;arg1.Components.length&gt;0;_comp++)
+       {
+          var tempcomp=arg1.Components[_comp];
+          if(tempcomp.hasOwnProperty(&apos;Observation&apos;))
+          {
+           
+            var tempcomponent=VitalComponent(tempcomp.Observation,patientid);
+            if(tempcomponent!=undefined)
+            {
+
+                var observationid=new Reference(&apos;#&apos;+new Resource(tempcomponent.getId()));
+                diagnosticreport.addResult(observationid);
+                diagnosticreport.addContained(tempcomponent)    
+            } 
+            
+          }
+          
+     
+       }
+
+ 
+   }
+   
+        diagnosticreport.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(diagnosticreport))));
+ //   var oDiagnosticReport=JSON.parse(parser.encodeResourceToString(diagnosticreport));
+    //logger.info(&apos;Result Resource-&gt;&apos;+parser.encodeResourceToString(diagnosticreport));
+
+    if(countkey(parser.encodeResourceToString(diagnosticreport))&gt;4)
+    {
+        //SavefhirResource(diagnosticreport,bundleid,section)    ;
+        return diagnosticreport;
+    }
+    
+//    return diagnosticreport;
+      
+
+}</code>
+  </properties>
+</codeTemplate>
