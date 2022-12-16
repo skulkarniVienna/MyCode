@@ -1,17 +1,17 @@
 <codeTemplate version="3.12.0">
   <id>9eacf259-f72c-4aeb-9c1a-3d22b3c56a30</id>
   <name>VitalComponent</name>
-  <revision>38</revision>
+  <revision>39</revision>
   <lastModified>
-    <time>1670676355428</time>
+    <time>1671191292913</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
@@ -180,13 +180,45 @@
      /Author Block End/   
 
 
+    if(arg1.hasOwnProperty(&apos;Performers&apos;))
+    {
+        for(var _perf=0;_perf&lt;arg1.Performers.length;_perf++)
+        {
+            var tempperformer=arg1.Performers[_perf];
+
+            /Performer Block Start/
+            var tempsupport=AuthortoPractictionerRole(tempperformer.AssignedEntity);
+            if(tempsupport!= undefined)
+            {
+                observation.addContained(tempsupport);    
+                observation.addPerformer(new Reference().setReference(&apos;#&apos;+new Resource(tempsupport.getId())));
+            }
+
+            var tempsupportperson=AuthortoPractictioner(tempperformer.AssignedEntity);
+            if(tempsupportperson!= undefined)
+            {
+                observation.addContained(tempsupportperson);
+            }
+                    
+            var tempsupportorg=AuthortoOrganization(tempperformer.AssignedEntity.Organizations[0]);
+            if(tempsupportorg!= undefined)
+            {
+                observation.addContained(tempsupportorg);
+            }
+
+           /Performer Block End/
+        }
+    }
+    
+
+
 
     /*
     if(component!=undefined)
     {
         observation.addComponent(component);    
     }
-	*/
+    */
     if(referencerange!=undefined)
     {
         observation.addReferenceRange(referencerange);    

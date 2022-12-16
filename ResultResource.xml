@@ -1,17 +1,17 @@
 <codeTemplate version="3.12.0">
   <id>bb55803a-fefe-4bb1-b9dc-aabbd5db0033</id>
   <name>ResultResource</name>
-  <revision>17</revision>
+  <revision>19</revision>
   <lastModified>
-    <time>1670675311341</time>
+    <time>1671191619129</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
@@ -162,7 +162,37 @@
 
                 var observationid=new Reference(&apos;#&apos;+new Resource(tempcomponent.getId()));
                 diagnosticreport.addResult(observationid);
-                diagnosticreport.addContained(tempcomponent)    
+                diagnosticreport.addContained(tempcomponent);
+
+                if(tempcomp.Observation.hasOwnProperty(&apos;Performers&apos;))
+                {
+                    for(var _perf=0;_perf&lt;tempcomp.Observation.Performers.length;_perf++)
+                    {
+                        var temp_performer=tempcomp.Observation.Performers[_perf];
+
+                        /Performer Block Start/
+                        var temp_support=AuthortoPractictionerRole(temp_performer.AssignedEntity);
+                        if(temp_support!= undefined)
+                        {
+                            diagnosticreport.addContained(temp_support);    
+                        }
+
+                        var temp_supportperson=AuthortoPractictioner(temp_performer.AssignedEntity);
+                        if(temp_supportperson!= undefined)
+                        {
+                            diagnosticreport.addContained(temp_supportperson);
+                        }
+                                
+                        var temp_supportorg=AuthortoOrganization(temp_performer.AssignedEntity.Organizations[0]);
+                        if(temp_supportorg!= undefined)
+                        {
+                            diagnosticreport.addContained(temp_supportorg);
+                        }
+
+                       /Performer Block End/
+                    }
+                }
+    
             } 
             
           }

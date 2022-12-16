@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>be554cb7-0d13-4069-ab40-4c2ac5ac4bb2</id>
   <name>VitalResource</name>
-  <revision>22</revision>
+  <revision>23</revision>
   <lastModified>
-    <time>1670677165238</time>
+    <time>1671192233283</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
-      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -184,7 +184,36 @@
                 }
                  
             }
-             /Author Block End/      
+             /Author Block End/ 
+
+            if(tempcomp.Observation.hasOwnProperty(&apos;Performers&apos;))
+            {
+                for(var _perf=0;_perf&lt;tempcomp.Observation.Performers.length;_perf++)
+                {
+                    var temp_performer=tempcomp.Observation.Performers[_perf];
+
+                    /Performer Block Start/
+                    var temp_support=AuthortoPractictionerRole(temp_performer.AssignedEntity);
+                    if(temp_support!= undefined)
+                    {
+                        observation.addContained(temp_support);    
+                    }
+
+                    var temp_supportperson=AuthortoPractictioner(temp_performer.AssignedEntity);
+                    if(temp_supportperson!= undefined)
+                    {
+                        observation.addContained(temp_supportperson);
+                    }
+                                
+                    var temp_supportorg=AuthortoOrganization(temp_performer.AssignedEntity.Organizations[0]);
+                    if(temp_supportorg!= undefined)
+                    {
+                        observation.addContained(temp_supportorg);
+                    }
+
+                       /Performer Block End/
+                }
+            }     
         } 
 
         

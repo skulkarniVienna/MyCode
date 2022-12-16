@@ -1,0 +1,297 @@
+<codeTemplate version="3.12.0">
+  <id>aea97ea3-72c8-4b92-bab8-e24e8cafb934</id>
+  <name>PopulateEntityRelationships_with_Textsection</name>
+  <revision>17</revision>
+  <lastModified>
+    <time>1670672809013</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function PopulateEntityRelationshipswithText(_entryrelationship,_sectionText) {
+	var entryrelationship = {};
+	
+	if(_entryrelationship != null){
+		entryrelationship.SequenceNumber = GetINT(_entryrelationship.getSequenceNumber());	
+		entryrelationship.TypeCode = GetVocabInfo(_entryrelationship.getTypeCode());
+	}
+	
+	var _entryrelationshipObservation = _entryrelationship.getObservation();
+			if (_entryrelationshipObservation != null) {
+				var entryrelationshipObservation = {};
+				entryrelationshipObservation.TemplateIds = GetIIList(_entryrelationshipObservation.getTemplateIds());
+				entryrelationshipObservation.MoodCode = GetVocabInfo(_entryrelationshipObservation.getMoodCode());
+				entryrelationshipObservation.Ids = GetIIList(_entryrelationshipObservation.getIds());
+				entryrelationshipObservation.Code = GetCD(_entryrelationshipObservation.getCode());
+				if(entryrelationshipObservation.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipObservation.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipObservation.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipObservation.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipObservation.Values = GetAnyList(_entryrelationshipObservation.getValues());
+				if(entryrelationshipObservation.hasOwnProperty(&apos;Values&apos;))
+				{
+					//logger.info(&apos;PopulateEntityRelationshipswithText-&gt;&apos;+JSON.stringify(entryrelationshipObservation))
+					if(entryrelationshipObservation.Values.length&gt;0)
+					{
+						if(entryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL != undefined)
+						{
+							var _referenceValue = entryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL.Value;
+						
+							entryrelationshipObservation.Values[0].CD.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+						}
+					}
+				}
+				
+
+				
+				entryrelationshipObservation.StatusCode = GetCS(_entryrelationshipObservation.getStatusCode());
+				entryrelationshipObservation.EffectiveTime = GetIVL_TS(_entryrelationshipObservation.getEffectiveTime());
+				entryrelationshipObservation.Authors = GetAuthorList(_entryrelationshipObservation.getAuthors());
+				entryrelationshipObservation.Participants = GetParticipant2List(_entryrelationshipObservation.getParticipants());
+				entryrelationshipObservation.Informants = GetInformant12List(_entryrelationshipObservation.getInformants());
+
+				if(entryrelationshipObservation.Participants[0].ParticipantRole.PlayingEntity.Code.hasOwnProperty(&apos;OriginalText&apos;))
+                     {
+                        if(entryrelationshipObservation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipObservation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Reference.TEL_URL !== undefined)
+                        {
+                           var _referenceValueForCode=entryrelationshipObservation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Reference.TEL_URL.Value;
+                           entryrelationshipObservation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Reference.TEL_URL.Value=GetValuebyId(_sectionText,_referenceValueForCode);
+                        }
+                     }
+				
+				var _entryrelationshipObservationentryrelationships = _entryrelationshipObservation.getEntryRelationships();
+				var EntryrelationshipObservationentryrelationships = [];
+
+				if (_entryrelationshipObservationentryrelationships != null) {
+					var _entryrelationshipObservationentryrelationshipsSize = _entryrelationshipObservationentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipObservationentryrelationshipsSize; _count++) {
+						var EntryrelationshipObservationentryrelationship = {};
+						var _entryrelationshipObservationentryrelationship = _entryrelationshipObservationentryrelationships.get(_count);
+						EntryrelationshipObservationentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipObservationentryrelationship,_sectionText);
+						EntryrelationshipObservationentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipObservationentryrelationship.getTypeCode());
+						EntryrelationshipObservationentryrelationships.push(EntryrelationshipObservationentryrelationship);
+					}
+				}
+				entryrelationshipObservation.EntryRelationships = EntryrelationshipObservationentryrelationships;
+				entryrelationship.Observation = entryrelationshipObservation;
+			}
+
+			var _entryrelationshipEncounter = _entryrelationship.getEncounter();
+			if (_entryrelationshipEncounter != null) {
+				var entryrelationshipEncounter = {};
+				entryrelationshipEncounter.TemplateIds = GetIIList(_entryrelationshipEncounter.getTemplateIds());
+				entryrelationshipEncounter.MoodCode = GetVocabInfo(_entryrelationshipEncounter.getMoodCode());
+				entryrelationshipEncounter.Ids = GetIIList(_entryrelationshipEncounter.getIds());
+				entryrelationshipEncounter.Code = GetCD(_entryrelationshipEncounter.getCode());
+				if(entryrelationshipEncounter.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipEncounter.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipEncounter.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipEncounter.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+			
+				var _entryrelationshipEncounterentryrelationships = _entryrelationshipEncounter.getEntryRelationships();
+				var EntryrelationshipEncounterentryrelationships = [];
+
+				if (_entryrelationshipEncounterentryrelationships != null) {
+					var _entryrelationshipEncounterentryrelationshipsSize = _entryrelationshipEncounterentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipEncounterentryrelationshipsSize; _count++) {
+						var EntryrelationshipEncounterentryrelationship = {};
+						var _entryrelationshipEncounterentryrelationship = _entryrelationshipEncounterentryrelationships.get(_count);
+						EntryrelationshipEncounterentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipEncounterentryrelationship,_sectionText);
+						EntryrelationshipEncounterentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipEncounterentryrelationship.getTypeCode());
+						EntryrelationshipEncounterentryrelationships.push(EntryrelationshipEncounterentryrelationship);
+					}
+				}
+				entryrelationshipEncounter.EntryRelationships = EntryrelationshipEncounterentryrelationships;
+				entryrelationship.Encounter = entryrelationshipEncounter;
+			}
+
+			var _entryrelationshipAct = _entryrelationship.getAct();
+			if (_entryrelationshipAct != null) {
+				var entryrelationshipAct = {};
+				entryrelationshipAct.TemplateIds = GetIIList(_entryrelationshipAct.getTemplateIds());
+				entryrelationshipAct.MoodCode = GetVocabInfo(_entryrelationshipAct.getMoodCode());
+				entryrelationshipAct.Ids = GetIIList(_entryrelationshipAct.getIds());
+				entryrelationshipAct.Code = GetCD(_entryrelationshipAct.getCode());
+				if(entryrelationshipAct.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipAct.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipAct.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipAct.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipAct.StatusCode = GetCS(_entryrelationshipAct.getStatusCode());
+				entryrelationshipAct.Text = GetED(_entryrelationshipAct.getText());
+				if(entryrelationshipAct.Text.Reference.TEL_URL != null &amp;&amp; entryrelationshipAct.Text.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipAct.Text.Reference.TEL_URL.Value;
+					entryrelationshipAct.Text.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipAct.EffectiveTime = GetIVL_TS(_entryrelationshipAct.getEffectiveTime());
+				entryrelationshipAct.Participants = GetParticipant2List(_entryrelationshipAct.getParticipants());
+
+				
+				entryrelationshipAct.Performers = GetPerformer2List(_entryrelationshipAct.getPerformers());
+
+				var _entryrelationshipActentryrelationships = _entryrelationshipAct.getEntryRelationships();
+				var EntryrelationshipActentryrelationships = [];
+
+				if (_entryrelationshipActentryrelationships != null) {
+					var _entryrelationshipActentryrelationshipsSize = _entryrelationshipActentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipActentryrelationshipsSize; _count++) {
+						var EntryrelationshipActentryrelationship = {};
+						var _entryrelationshipActentryrelationship = _entryrelationshipActentryrelationships.get(_count);
+						EntryrelationshipActentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipActentryrelationship,_sectionText);
+						EntryrelationshipActentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipActentryrelationship.getTypeCode());
+						EntryrelationshipActentryrelationships.push(EntryrelationshipActentryrelationship);
+					}
+				}
+				entryrelationshipAct.EntryRelationships = EntryrelationshipActentryrelationships;
+				entryrelationship.Act = entryrelationshipAct;
+			}
+
+			var _entryrelationshipsupply = _entryrelationship.getSupply();
+			if (_entryrelationshipsupply != null) {
+				var entryrelationshipsupply = {};
+				entryrelationshipsupply.TemplateIds = GetIIList(_entryrelationshipsupply.getTemplateIds());
+				entryrelationshipsupply.MoodCode = GetVocabInfo(_entryrelationshipsupply.getMoodCode());
+				entryrelationshipsupply.MoodCode=GetVocabInfo(_entryrelationshipsupply.getMoodCode());
+				entryrelationshipsupply.Ids = GetIIList(_entryrelationshipsupply.getIds());
+				entryrelationshipsupply.Code = GetCD(_entryrelationshipsupply.getCode());
+				if(entryrelationshipsupply.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipsupply.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipsupply.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipsupply.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+			
+				entryrelationshipsupply.Quantity = GetPQ(_entryrelationshipsupply.getQuantity());
+				entryrelationshipsupply.StatusCode = GetCS(_entryrelationshipsupply.getStatusCode());
+				entryrelationshipsupply.EffectiveTimes = GetSXCM_TSList(_entryrelationshipsupply.getEffectiveTimes());
+				entryrelationshipsupply.Participants = GetParticipant2List(_entryrelationshipsupply.getParticipants());
+				entryrelationshipsupply.Product = GetProduct(_entryrelationshipsupply.getProduct());
+				entryrelationshipsupply.Performers = GetPerformer2List(_entryrelationshipsupply.getPerformers());
+				entryrelationshipsupply.Informants = GetInformant12List(_entryrelationshipsupply.getInformants());
+				entryrelationshipsupply.Authors = GetAuthorList(_entryrelationshipsupply.getAuthors());
+
+				var _entryrelationshipsupplyentryrelationships = _entryrelationshipsupply.getEntryRelationships();
+				var Entryrelationshipsupplyentryrelationships = [];
+
+				if (_entryrelationshipsupplyentryrelationships != null) {
+					var _entryrelationshipsupplyentryrelationshipsSize = _entryrelationshipsupplyentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipsupplyentryrelationshipsSize; _count++) {
+						var Entryrelationshipsupplyentryrelationship = {};
+						var _entryrelationshipsupplyentryrelationship = _entryrelationshipsupplyentryrelationships.get(_count);
+						Entryrelationshipsupplyentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipsupplyentryrelationship,_sectionText);
+						Entryrelationshipsupplyentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipsupplyentryrelationship.getTypeCode());
+						Entryrelationshipsupplyentryrelationships.push(Entryrelationshipsupplyentryrelationship);
+					}
+				}
+				entryrelationshipsupply.EntryRelationships = Entryrelationshipsupplyentryrelationships;
+				entryrelationship.supply = entryrelationshipsupply;
+			}
+
+			var _entryrelationshipProcedure = _entryrelationship.getProcedure();
+			if (_entryrelationshipProcedure != null) {
+				var entryrelationshipProcedure = {};
+				entryrelationshipProcedure.TemplateIds = GetIIList(_entryrelationshipProcedure.getTemplateIds());
+				entryrelationshipProcedure.MoodCode = GetVocabInfo(_entryrelationshipProcedure.getMoodCode());
+				entryrelationshipProcedure.Ids = GetIIList(_entryrelationshipProcedure.getIds());
+				entryrelationshipProcedure.Code = GetCD(_entryrelationshipProcedure.getCode());
+				if(entryrelationshipProcedure.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipProcedure.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipProcedure.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipProcedure.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipProcedure.StatusCode = GetCS(_entryrelationshipProcedure.getStatusCode());
+				entryrelationshipProcedure.Text = GetED(_entryrelationshipProcedure.getText());
+				entryrelationshipProcedure.EffectiveTime = GetIVL_TS(_entryrelationshipProcedure.getEffectiveTime());
+				entryrelationshipProcedure.TargetSiteCodes = GetCDList(_entryrelationshipProcedure.getTargetSiteCodes());
+				entryrelationshipProcedure.PriorityCode = GetCE(_entryrelationshipProcedure.getPriorityCode());
+				entryrelationshipProcedure.MethodCodes = GetCEList(_entryrelationshipProcedure.getMethodCodes());
+				entryrelationshipProcedure.Authors = GetAuthorList(_entryrelationshipProcedure.getAuthors());
+				entryrelationshipProcedure.Participants = GetParticipant2List(_entryrelationshipProcedure.getParticipants());
+				entryrelationshipProcedure.Performers = GetPerformer2List(_entryrelationshipProcedure.getPerformers());
+				entryrelationshipProcedure.Specimens = GetSpecimenList(_entryrelationshipProcedure.getSpecimens());
+
+				var _entryrelationshipProcedureentryrelationships = _entryrelationshipProcedure.getEntryRelationships();
+				var EntryrelationshipProcedureentryrelationships = [];
+
+				if (_entryrelationshipProcedureentryrelationships != null) {
+					var _entryrelationshipProcedureentryrelationshipsSize = _entryrelationshipProcedureentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipProcedureentryrelationshipsSize; _count++) {
+						var EntryrelationshipProcedureentryrelationship = {};
+						var _entryrelationshipProcedureentryrelationship = _entryrelationshipProcedureentryrelationships.get(_count);
+						EntryrelationshipProcedureentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipProcedureentryrelationship,_sectionText);
+						EntryrelationshipProcedureentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipProcedureentryrelationship.getTypeCode());
+						EntryrelationshipProcedureentryrelationships.push(EntryrelationshipProcedureentryrelationship);
+					}
+				}
+				entryrelationshipProcedure.EntryRelationships = EntryrelationshipProcedureentryrelationships;
+				entryrelationship.Procedure = entryrelationshipProcedure;
+			}
+
+			var _entryrelationshipsubstanceAdministration = _entryrelationship.getSubstanceAdministration();
+			if (_entryrelationshipsubstanceAdministration != null) {
+				var entryrelationshipsubstanceAdministration = {};
+				entryrelationshipsubstanceAdministration.TemplateIds = GetIIList(_entryrelationshipsubstanceAdministration.getTemplateIds());
+				entryrelationshipsubstanceAdministration.MoodCode = GetVocabInfo(_entryrelationshipsubstanceAdministration.getMoodCode());
+				entryrelationshipsubstanceAdministration.Ids = GetIIList(_entryrelationshipsubstanceAdministration.getIds());
+				entryrelationshipsubstanceAdministration.Code = GetCD(_entryrelationshipsubstanceAdministration.getCode());
+				if(entryrelationshipsubstanceAdministration.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipsubstanceAdministration.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipsubstanceAdministration.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipsubstanceAdministration.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipsubstanceAdministration.Text = GetED(_entryrelationshipsubstanceAdministration.getText());
+				if(entryrelationshipsubstanceAdministration.Text.Reference.TEL_URL != null &amp;&amp; entryrelationshipsubstanceAdministration.Text.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipsubstanceAdministration.Text.Reference.TEL_URL.Value;
+					entryrelationshipsubstanceAdministration.Text.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipsubstanceAdministration.MoodCode = GetVocabInfo(_entryrelationshipsubstanceAdministration.getMoodCode());
+				entryrelationshipsubstanceAdministration.StatusCode = GetCS(_entryrelationshipsubstanceAdministration.getStatusCode());
+				entryrelationshipsubstanceAdministration.EffectiveTimes = GetSXCM_TSList(_entryrelationshipsubstanceAdministration.getEffectiveTimes());
+				entryrelationshipsubstanceAdministration.RepeatNumber = GetIVL_INT(_entryrelationshipsubstanceAdministration.getRepeatNumber());
+				entryrelationshipsubstanceAdministration.RouteCode = GetCE(_entryrelationshipsubstanceAdministration.getRouteCode());
+				entryrelationshipsubstanceAdministration.ApproachSiteCodes = GetCDList(_entryrelationshipsubstanceAdministration.getApproachSiteCodes());
+				entryrelationshipsubstanceAdministration.DoseQuantity = GetIVL_PQ(_entryrelationshipsubstanceAdministration.getDoseQuantity());
+				entryrelationshipsubstanceAdministration.RateQuantity = GetIVL_PQ(_entryrelationshipsubstanceAdministration.getRateQuantity());
+				entryrelationshipsubstanceAdministration.MaxDoseQuantity = GetRTO_PQ_PQ(_entryrelationshipsubstanceAdministration.getMaxDoseQuantity());
+				entryrelationshipsubstanceAdministration.Consumable = GetConsumable(_entryrelationshipsubstanceAdministration.getConsumable());
+				if(entryrelationshipsubstanceAdministration.Consumable.ManufacturedProduct.Material.Code.OriginalText.Reference.TEL_URL != null &amp;&amp; entryrelationshipsubstanceAdministration.Consumable.ManufacturedProduct.Material.Code.OriginalText.Reference.TEL_URL != undefined){
+					var _referenceValue = entryrelationshipsubstanceAdministration.Consumable.ManufacturedProduct.Material.Code.OriginalText.Reference.TEL_URL.Value;
+					entryrelationshipsubstanceAdministration.Consumable.ManufacturedProduct.Material.Code.OriginalText.Reference.TEL_URL.Value = GetValuebyId(_sectionText,_referenceValue);
+				}
+				entryrelationshipsubstanceAdministration.Performers = GetPerformer2List(_entryrelationshipsubstanceAdministration.getPerformers());
+				entryrelationshipsubstanceAdministration.Preconditions = GetPreconditionList(_entryrelationshipsubstanceAdministration.getPreconditions());
+				entryrelationshipsubstanceAdministration.Participants = GetParticipant2List(_entryrelationshipsubstanceAdministration.getParticipants());
+				entryrelationshipsubstanceAdministration.Authors = GetAuthorList(_entryrelationshipsubstanceAdministration.getAuthors());
+
+				var _entryrelationshipsubstanceAdministrationentryrelationships = _entryrelationshipsubstanceAdministration.getEntryRelationships();
+				var EntryrelationshipsubstanceAdministrationentryrelationships = [];
+
+				if (_entryrelationshipsubstanceAdministrationentryrelationships != null) {
+					var _entryrelationshipsubstanceAdministrationentryrelationshipsSize = _entryrelationshipsubstanceAdministrationentryrelationships.size();
+					var _count = 0;
+					for (_count = 0; _count &lt; _entryrelationshipsubstanceAdministrationentryrelationshipsSize; _count++) {
+						var EntryrelationshipsubstanceAdministrationentryrelationship = {};
+						var _entryrelationshipsubstanceAdministrationentryrelationship = _entryrelationshipsubstanceAdministrationentryrelationships.get(_count);
+						EntryrelationshipsubstanceAdministrationentryrelationship = PopulateEntityRelationshipsLevel1withText(_entryrelationshipsubstanceAdministrationentryrelationship,_sectionText);
+						EntryrelationshipsubstanceAdministrationentryrelationship.TypeCode = GetVocabInfo(_entryrelationshipsubstanceAdministrationentryrelationship.getTypeCode());
+						EntryrelationshipsubstanceAdministrationentryrelationships.push(EntryrelationshipsubstanceAdministrationentryrelationship);
+					}
+				}
+
+				entryrelationshipsubstanceAdministration.EntryRelationships = EntryrelationshipsubstanceAdministrationentryrelationships;
+				entryrelationship.substanceAdministration = entryrelationshipsubstanceAdministration;
+			}
+
+	return entryrelationship;			
+}</code>
+  </properties>
+</codeTemplate>
