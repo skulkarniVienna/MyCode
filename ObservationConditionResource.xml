@@ -1,0 +1,175 @@
+<codeTemplate version="3.12.0">
+  <id>f8fe0426-baf0-4847-9daf-e6676b61fe65</id>
+  <name>ObservationConditionResource</name>
+  <revision>10</revision>
+  <lastModified>
+    <time>1671729428089</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function ObservationConditionResource(arg1,patientid) 
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var condition = new org.hl7.fhir.r4.model.Condition();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            condition.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+                
+    }
+                
+    condition.setSubject(new Reference().setReference(patientid));      
+      
+    var enccategory=GetCodingList(arg1.Code);          
+    if(enccategory.length&gt;0)
+    {
+        condition.addCategory(new CodeableConcept().setCoding(enccategory));    
+    }
+
+                
+    var encdate=GetEffectiveTimeInfo(arg1);
+        
+    if(encdate.startdatetime!=&apos;&apos;)
+    {
+        condition.setOnset(new DateTimeType(formatdate(encdate.startdatetime)));
+        
+    }
+
+    if(encdate.enddatetime!=&apos;&apos;)
+    {
+        condition.setAbatement(new DateTimeType(formatdate(encdate.enddatetime)));
+        condition.setClinicalStatus(CodeableConcept(Coding(&apos;http://terminology.hl7.org/CodeSystem/condition-clinical&apos;,&apos;resolved&apos;,&apos;Resolved&apos;)));
+    }        
+            
+    var conditioncode=GetCodingList(arg1.Values[0].CD);
+
+    if(conditioncode.length&gt;0)
+    {
+        condition.setCode(new CodeableConcept().setCoding(conditioncode));
+    }
+
+
+    if(arg1.hasOwnProperty(&apos;Informants&apos;))
+    {
+        if(arg1.Informants.length&gt;0)
+        {
+            var tempasserter=AuthortoPractictionerRole(arg1.Informants[0].AssignedEntity);
+            if(tempasserter!= undefined)
+            {
+                condition.addContained(tempasserter);    
+                condition.setAsserter(new Reference().setReference(&apos;#&apos;+new Resource(tempasserter.getId())));
+            }
+
+            var tempasserterperson=AuthortoPractictioner(arg1.Informants[0].AssignedEntity);
+            if(tempasserterperson!= undefined)
+            {
+                condition.addContained(tempasserterperson);
+            }
+                   
+            var tempasserterorg= AuthortoOrganization(arg1.Informants[0].AssignedEntity.Organizations[0]);
+            if(tempasserterorg!= undefined)
+            {
+                condition.addContained(tempasserterorg);
+            }   
+        }
+
+    }
+
+
+    if(arg1.hasOwnProperty(&apos;Authors&apos;))
+    {
+    	if(arg1.Authors[0].Time.Value!=&apos;&apos;)
+	   	{
+	    	condition.setRecordedDateElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
+	   	}
+	    
+	    /Author Block Start/
+	   	var temprecorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+	   	if(temprecorder!= undefined)
+	   	{
+	    		condition.addContained(temprecorder);    
+	      	condition.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+	   	}
+
+
+	   	var temprecorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor);
+	   	if(temprecorderperson!= undefined)
+	   	{
+	    	condition.addContained(temprecorderperson);
+	   	}
+	           
+	    var temprecorderorg= AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+	   	if(temprecorderorg!= undefined)
+	   	{
+	    	condition.addContained(temprecorderorg);
+	   	}
+
+	   /Author Block End/	
+    }
+
+    //loop for Entryrelationship within observation
+    for(var _o_er=0;_o_er&lt;arg1.EntryRelationships.length&gt;0;_o_er++)
+    {
+        var temp_er=arg1.EntryRelationships[_o_er];
+
+        if(temp_er.hasOwnProperty(&apos;Observation&apos;))
+        {
+            //start of clinicalstatus
+            if(temp_er.Observation.Code.Code==&apos;33999-4&apos; &amp;&amp; encdate.enddatetime==&apos;&apos;)
+            {
+            		//logger.info(&apos;Is this getting executed&apos;);
+                condition.setClinicalStatus(new CodeableConcept().setCoding(GetMappedCodingList(temp_er.Observation.Values[0].CD,MapConditionClinicalStatus)));
+            }//end of clinicalstatus
+            
+            
+            // age at onset
+            if(temp_er.Observation.Code.Code==&apos;445518008&apos; || temp_er.Observation.Code.Code==&apos;397659008&apos;)
+            {
+                if(temp_er.Observation.Values[0].PQ.Value!=&apos;&apos;  &amp;&amp; encdate.startdatetime==&apos;&apos;)
+                {
+                    condition.setOnset(new Age().setValue(temp_er.Observation.Values[0].PQ.Value).setCode(temp_er.Observation.Values[0].PQ.Unit));    
+                }
+                            
+            }// end of OnsetAge
+            
+
+            if(temp_er.Observation.Code.Code==&apos;225773000&apos;)
+            {
+                //start of severity
+                var severitylist=GetMergedCodeList(temp_er.Observation.Values[0].CD);
+                for(var _s=0;_s&lt;severitylist.length;_s++)
+                {
+                    condition.setSeverity(CodeableConcept(GetCoding(severitylist[_s])))
+                }
+            }//end of severity
+        }// end of temp_er.hasOwnProperty(&apos;Observation&apos;)
+    }//end of temp_er for loop
+
+	condition.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(condition))));
+
+    if(countkey(parser.encodeResourceToString(condition))&gt;2)
+    {
+        return condition
+    }
+
+    
+            
+}</code>
+  </properties>
+</codeTemplate>

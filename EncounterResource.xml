@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>5ff514fe-780e-4d24-a226-e0c5f7aac20a</id>
   <name>EncounterResource</name>
-  <revision>76</revision>
+  <revision>77</revision>
   <lastModified>
-    <time>1670665438179</time>
+    <time>1671727599511</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
-      <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -333,6 +333,13 @@ function EncounterResource(arg1,txt,patientid)
                 encounter.addContained(tempprovider);    
                 encounter.setServiceProvider(new Reference().setReference(&apos;#&apos;+new Resource(tempprovider.getId())));      
                 encounter.addLocation().setLocation(new Reference().setReference(&apos;#&apos;+new Resource(tempprovider.getId())));      
+            }
+
+            var templocation=LocationResource(temppart.ParticipantRole);
+            if(templocation!=undefined)
+            {
+                encounter.addContained(templocation);    
+                encounter.addLocation().setLocation(new Reference().setReference(&apos;#&apos;+new Resource(templocation.getId())));      
             }
             
         }

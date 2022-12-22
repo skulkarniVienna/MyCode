@@ -1,0 +1,115 @@
+<codeTemplate version="3.12.0">
+  <id>8e6365bf-e95e-41d3-930a-9d759b248966</id>
+  <name>GetMergedCodeList</name>
+  <revision>22</revision>
+  <lastModified>
+    <time>1671726615238</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function GetMergedCodeList(arg1)
+{
+    var log=0;
+   var obj=[];
+   var referencetext=&apos;&apos;;
+   if(log==1)
+   {
+    logger.info(&apos;GetMergedCodeList in-&gt;&apos;+JSON.stringify(arg1));
+   }
+
+   if(arg1.hasOwnProperty(&apos;Code&apos;) &amp;&amp; arg1.hasOwnProperty(&apos;DisplayName&apos;))
+   {
+        if(arg1.hasOwnProperty(&apos;OriginalText&apos;))
+        {
+            if(arg1.OriginalText.hasOwnProperty(&apos;Reference&apos;))
+            {
+                if(arg1.OriginalText.Reference.hasOwnProperty(&apos;TEL_URL&apos;))
+                {
+                    if(arg1.OriginalText.Reference.TEL_URL.hasOwnProperty(&apos;Value&apos;))
+                    {
+                        if(arg1.OriginalText.Reference.TEL_URL.Value!=&apos;&apos;)
+                        {
+                            referencetext=arg1.OriginalText.Reference.TEL_URL.Value
+                             if(log==1)
+                            {   
+                                logger.info(&apos;GetMergedCodeList:referencetext-&gt;&apos;+    referencetext)
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+    
+        if(arg1.Code!=&apos;&apos; || arg1.DisplayName!=&apos;&apos; || referencetext!=&apos;&apos;)
+        {
+            var res={};
+            
+            res.Code=arg1.Code;
+            res.CodeSystem=arg1.CodeSystem;
+            res.CodeSystemName=arg1.CodeSystemName;
+            res.DisplayName=arg1.DisplayName;
+            if(log==1)
+        {
+                logger.info(&apos;GetMergedCodeList DisplayName-&gt;&apos;+res.DisplayName);
+                logger.info(&apos;GetMergedCodeList referencetext-&gt;&apos;+referencetext);
+        }
+
+        if(referencetext!=&apos;&apos; &amp;&amp; res.DisplayName==&apos;&apos;)
+        {
+            res.DisplayName=referencetext;
+        }
+        
+        if(log==1)
+        {
+            logger.info(&apos;GetMergedCodeList main-&gt;&apos;+JSON.stringify(res));
+        }
+          obj.push(res);
+
+        }
+        
+    }
+
+   if(arg1.hasOwnProperty(&apos;Translations&apos;))
+   {
+        for(var _t=0;_t&lt;arg1.Translations.length;_t++)
+        {
+            var res={};
+
+            res.Code=arg1.Translations[_t].Code;
+            res.CodeSystem=arg1.Translations[_t].CodeSystem;
+            res.CodeSystemName=arg1.Translations[_t].CodeSystemName;
+            res.DisplayName=arg1.Translations[_t].DisplayName!=&apos;&apos;?arg1.Translations[_t].DisplayName:arg1.Translations[_t].OriginalText.Text;
+            if(log==1)
+          {
+                logger.info(&apos;GetMergedCodeList Translations-&gt;&apos;+JSON.stringify(res));
+          }
+            obj.push(res)
+        }
+   }
+
+    if(log==1)
+   {
+    logger.info(&apos;GetMergedCodeList out-&gt;&apos;+JSON.stringify(obj));
+   }
+   return obj;
+}</code>
+  </properties>
+</codeTemplate>

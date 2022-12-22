@@ -1,0 +1,54 @@
+<codeTemplate version="3.12.0">
+  <id>b4c702ab-b378-476f-8a76-c2e07e47dff1</id>
+  <name>MapConditionClinicalStatus</name>
+  <revision>4</revision>
+  <lastModified>
+    <time>1671630196056</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+	Modify the description here. Modify the function name and parameters as needed. One function per
+	template is recommended; create a new code template for each new function.
+
+	@param {String} arg1 - arg1 description
+	@return {String} return description
+*/
+function MapConditionClinicalStatus(str)
+{
+    var obj={};
+    //logger.info(&apos;MapConditionClinicalStatus-&gt;&apos; +JSON.stringify(str))
+
+    if(str.Code=&apos;413322009&apos;)
+    {
+        obj.Code=&apos;resolved&apos;;
+        obj.CodeSystem=&apos;http://terminology.hl7.org/CodeSystem/condition-clinical&apos;;
+        obj.DisplayName=&apos;Resolved&apos;
+    }
+    else if(str.Code=&apos;73425007&apos;)
+    {
+        obj.Code=&apos;inactive&apos;;
+        obj.CodeSystem=&apos;http://terminology.hl7.org/CodeSystem/condition-clinical&apos;;
+        obj.DisplayName=&apos;Inactive&apos;
+    }
+    else
+    {
+        obj.Code=&apos;active&apos;;
+        obj.CodeSystem=&apos;http://terminology.hl7.org/CodeSystem/condition-clinical&apos;;
+        obj.DisplayName=&apos;Active&apos;
+    }
+
+    return obj;
+}</code>
+  </properties>
+</codeTemplate>

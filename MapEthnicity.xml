@@ -1,0 +1,48 @@
+<codeTemplate version="3.12.0">
+  <id>e9c3a683-6f98-4e5f-8867-35f41469773c</id>
+  <name>MapEthnicity</name>
+  <revision>3</revision>
+  <lastModified>
+    <time>1671641675980</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function MapEthnicity(arg1)
+{
+    var obj=new Coding();
+    
+    
+
+    if(String(arg1.Code).split(&quot;-&quot;).length - 1&gt;2)
+    {
+        obj.setSystem(&apos;urn:oid:2.16.840.1.113883.6.238&apos;);
+        obj.setCode(arg1.Code);
+        obj.setDisplay(arg1.DisplayName);
+    }
+    else if(arg1.Code==&apos;U&apos;)
+    {
+    		obj.setSystem(&apos;http://terminology.hl7.org/CodeSystem/v3-NullFlavor&apos;);
+        	obj.setCode(&apos;UNK&apos;);
+        	obj.setDisplay(&apos;Unknown&apos;);
+    }
+    else
+    {
+    		obj.setSystem(&apos;urn:oid:&apos;+arg1.CodeSystem);
+        	obj.setCode(arg1.Code);
+        	obj.setDisplay(arg1.DisplayName);
+    }
+
+    return obj;
+}</code>
+  </properties>
+</codeTemplate>

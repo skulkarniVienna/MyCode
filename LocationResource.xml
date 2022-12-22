@@ -1,0 +1,76 @@
+<codeTemplate version="3.12.0">
+  <id>94f1dc3a-4690-4479-9615-e0dad5571862</id>
+  <name>LocationResource</name>
+  <revision>9</revision>
+  <lastModified>
+    <time>1671727865804</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function LocationResource(arg1)
+{
+   //Takes Participant.ParticipantRole Node as argument
+   importPackage(org.hl7.fhir.r4.model);
+   var location = new org.hl7.fhir.r4.model.Location();
+   var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+   var parser = ctx.newJsonParser();  
+
+   for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+   {
+      if(arg1.Ids[_id].Extension!=&apos;&apos;)
+      {
+         location.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+      }
+   }
+      
+   if(arg1.PlayingEntity.Names[0].Text!=&apos;&apos;)
+   {
+      location.setName(arg1.PlayingEntity.Names[0].Text.trim())
+   }
+
+   var address=AddAddressNode(arg1.Addrs)
+   if(address.length&gt;0)
+   {
+      location.setAddress(address[0]);   
+   }
+   
+   location.setTelecom(AddTelecomNode(arg1.Telecoms));
+
+   var typelist=GetCodingList(arg1.Code);
+   if(typelist!=undefined)
+   {
+    location.addType(new CodeableConcept().setCoding(typelist)) 
+   }
+   
+
+   location.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(location))));
+   
+
+   
+   if(countkey(parser.encodeResourceToString(location))&gt;2)
+   {
+      
+      return location
+   }
+        
+   
+}</code>
+  </properties>
+</codeTemplate>

@@ -1,0 +1,412 @@
+<codeTemplate version="3.12.0">
+  <id>4ae44f57-065a-40e6-9f60-eac670162cc8</id>
+  <name>GetPatientResource_hapi</name>
+  <revision>78</revision>
+  <lastModified>
+    <time>1671641828064</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function GetPatientResource_hapi(_recordTargets,bundleId) 
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();
+    channelMap.put(&apos;_recordTargets&apos;, JSON.stringify(_recordTargets));
+    if (_recordTargets != null) 
+    {
+        var _recordTargetsSize = _recordTargets.length;
+        var _count = 0;
+        if (_recordTargetsSize &gt; 0) 
+        {
+            //initializing Patient resource
+            var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+
+            var patient = new org.hl7.fhir.r4.model.Patient();
+
+            
+            for (; _count &lt; _recordTargetsSize; _count++) 
+            {
+
+                //initializing Patient identifier
+                var _patientIds = _recordTargets[_count].PatientRole.Ids;
+                if (_patientIds != null) 
+                {
+                    var _patientIdsSize = _patientIds.length;
+                    var _i = 0;
+                    
+                    for (; _i &lt; _patientIdsSize; _i++) 
+                    {
+                        patient.addIdentifier().setSystem(&quot;urn:oid:&quot;+_patientIds[_i].Root).setValue(_patientIds[_i].Extension);
+
+                    }
+
+                     //Name structure
+                    var _patientnamedetails = _recordTargets[_count].PatientRole.Patient.Names;
+                    if (_patientnamedetails != null) 
+                    {
+                        patient.setName(AddNameNode(_patientnamedetails))
+                        
+                    }
+                }
+
+                //Telecom
+
+                var _patientcontacts = _recordTargets[_count].PatientRole.Telecoms;
+                if (_patientcontacts != null) 
+                {
+                    var _patientcontactsSize = _patientcontacts.length;
+                    var _k = 0;
+                    if (_patientcontactsSize &gt; 0) 
+                    {
+                        patient.setTelecom(AddTelecomNode(_patientcontacts))
+                        /*
+
+                        for (; _k &lt; _patientcontactsSize; _k++) 
+                        {
+
+                                var pcontact=patient.addTelecom()
+                                if(_patientcontacts[_k].TEL_URL.Value!=&apos;&apos;)
+                                {
+                                    pcontact.setValue(_patientcontacts[_k].TEL_URL.Value)
+                                }
+                                if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
+                                {
+                                        pcontact.setSystem(ContactPoint.ContactPointSystem.valueOf(MapTelecomSystem(_patientcontacts[_k].TelecomAddress[0].Name)));
+                                }
+                                if(_patientcontacts[_k].TelecomAddress[0].Name!=&apos;&apos;)
+                                {
+                                        pcontact.setUse(ContactPoint.ContactPointUse.valueOf(MapTelecomUse(_patientcontacts[_k].TelecomAddress[0].Name)));
+                                }
+                           
+                            
+
+                        }*/
+                    }
+                }
+
+                var gender=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.AdministrativeGenderCode);
+                if(gender.length&gt;0)
+                {
+                    //logger.info(&apos;PatientResource-&gt;&apos;+gender[0].Code)
+                    if(gender.length&gt;1)
+                    {
+                        patient.setGender(Enumerations.AdministrativeGender.valueOf(MapGender(gender[1].Code)))     
+                    }
+                    else
+                    {
+                        patient.setGender(Enumerations.AdministrativeGender.valueOf(MapGender(gender[0].Code)))     
+                    }
+                    
+                }
+
+
+
+                if(_recordTargets[_count].PatientRole.Patient.BirthTime.Value!=&apos;&apos;)
+                {
+                    patient.setBirthDate(new Date(parseCCDBirthDate(_recordTargets[_count].PatientRole.Patient.BirthTime.Value)));  
+                }
+
+                
+                
+    
+                
+                patient.setAddress(AddAddressNode(_recordTargets[_count].PatientRole.Address))
+
+                var maritalstatus=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.MaritalStatusCode);
+
+                //marital
+                if (maritalstatus.length&gt;0) 
+                {
+                    
+                    var maritalcoding=new Coding();
+
+                    if(maritalstatus[0].CodeSystem!=&apos;&apos;)
+                    {
+                        maritalcoding.setSystem(&quot;urn:oid:&quot;+maritalstatus[0].CodeSystem) 
+                    }
+
+                    if(maritalstatus[0].Code!=&apos;&apos;)
+                    {
+                        maritalcoding.setCode(maritalstatus[0].Code)    
+                    }
+
+                    if(maritalstatus[0].DisplayName!=&apos;&apos;)
+                    {
+                        maritalcoding.setDisplay(maritalstatus[0].DisplayName)  
+                    }
+                    
+
+                    patient.setMaritalStatus(CodeableConcept(maritalcoding))
+                    
+                }
+
+
+                //ethnicity
+                if (_recordTargets[_count].PatientRole.Patient.EthnicGroupCode.DisplayName != &apos;&apos; || _recordTargets[_count].PatientRole.Patient.EthnicGroupCode.Code != &apos;&apos;) 
+                {
+
+                    var ethnicity = patient.addExtension();
+                    ethnicity.setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity&apos;);
+
+                    
+                     // Add category to ethnicity extension
+                    var ombCategory = ethnicity.addExtension();
+
+                    ombCategory.setUrl(&quot;ombCategory&quot;);
+                    ombCategory.setValue(MapEthnicity(_recordTargets[_count].PatientRole.Patient.EthnicGroupCode));
+
+
+                    // Add text display to ethnicity extension
+                    var ethnicityText = ethnicity.addExtension();
+                    ethnicityText.setUrl(&quot;text&quot;);
+                    ethnicityText.setValue(new StringType(_recordTargets[_count].PatientRole.Patient.EthnicGroupCode.DisplayName));
+
+ 
+
+                }
+                
+                
+                //religion
+                var religiousaffiliation=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.ReligiousAffiliationCode);
+                if (religiousaffiliation.length&gt;0) 
+                {
+                    var religion = patient.addExtension();
+                    religion.setUrl(&apos;http://hl7.org/fhir/StructureDefinition/patient-religion&apos;);
+
+
+                    //Assign Coding
+                    var religioncoding = new Coding();
+                    religioncoding.setSystem(&quot;urn:oid:&quot;+religiousaffiliation[0].CodeSystem);
+                    religioncoding.setCode(religiousaffiliation[0].Code);
+                    religioncoding.setDisplay(religiousaffiliation[0].DisplayName);
+
+                    //Assign Codeable COncept
+                    religion.setValue(new CodeableConcept(religioncoding));
+
+                    
+                }
+                
+
+                var racelist=GetMergedCodeList(_recordTargets[_count].PatientRole.Patient.RaceCode);
+                //race
+                if (racelist.length&gt;0) 
+                {
+                    
+                    var race = patient.addExtension();
+                    race.setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/us-core-race&apos;);
+
+
+                    /*
+                    var ombCoding = new Coding();
+
+                    ombCoding.setSystem(&quot;urn:oid:&quot;+racelist[0].CodeSystem);
+
+                    ombCoding.setCode(racelist[0].Code);
+                    ombCoding.setDisplay(racelist[0].DisplayName);
+                    */
+
+                    //var ombCoding = GetMappedCodingList(_recordTargets[_count].PatientRole.Patient.RaceCode,MapRace);
+                    
+                    
+                     // Add category to ethnicity extension
+                    var ombCategory = race.addExtension();
+
+                    ombCategory.setUrl(&quot;ombCategory&quot;);
+                    ombCategory.setValue(MapRace(_recordTargets[_count].PatientRole.Patient.RaceCode));
+                    
+
+
+
+                    // Add text display to ethnicity extension
+                    var raceText = race.addExtension();
+                    raceText.setUrl(&quot;text&quot;);
+                    raceText.setValue(new StringType(racelist[0].DisplayName));
+
+                    
+
+                }
+
+
+                var temporg=OrganizationResource(_recordTargets[_count].PatientRole.Organization);
+                 if(temporg!=undefined &amp;&amp; temporg!=null)
+                 {
+                    patient.setManagingOrganization(new Reference().setReference(&apos;#&apos;+new Resource(temporg.getId())));
+                    patient.addContained(temporg);  
+                 }
+                 
+
+                var _patientLanguageCommunications = _recordTargets[_count].PatientRole.Patient.LanguageCommunications;
+                if (_patientLanguageCommunications != null) 
+                {
+                    var _patientLanguageCommunicationsSize = _patientLanguageCommunications.length;
+                    var _i = 0;
+                    if (_patientLanguageCommunicationsSize &gt; 0) 
+                    {
+                        for (; _i &lt; _patientLanguageCommunicationsSize; _i++)
+                        {
+                            var patientlanguage=new Coding();
+
+                            var olanguage=Maplanguage(_patientLanguageCommunications[_i].LanguageCode);
+
+                            if(olanguage.code!=&apos;&apos;)
+                            {
+                                patientlanguage.setCode(olanguage.code);
+                            }
+
+                            if(olanguage.display!=&apos;&apos;)
+                            {
+                                patientlanguage.setDisplay(olanguage.display);
+                            }
+
+                            if(olanguage.system!=&apos;&apos;)
+                            {
+                                patientlanguage.setSystem(olanguage.system);
+                            }
+                            
+                            var languagecomponent= new org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent();
+                            languagecomponent.setLanguage(CodeableConcept(patientlanguage));
+                            
+                        if(_patientLanguageCommunications[_i].hasOwnProperty(&apos;PreferenceInd&apos;))
+                        {
+                            if(_patientLanguageCommunications[_i].PreferenceInd.Value!=&apos;&apos;)
+                                 {
+                                    languagecomponent.setPreferredElement(new BooleanType(_patientLanguageCommunications[_i].PreferenceInd.Value)); 
+                                 }  
+                        }
+                            
+                            
+                            patient.addCommunication(languagecomponent)
+
+
+                        }
+                    }
+                }
+
+
+     
+
+                var _patientGuardians = _recordTargets[_count].PatientRole.Patient.Guardians;
+                if (_patientGuardians != null) 
+                {
+                    var _patientGuardiansSize = _patientGuardians.length;
+                    channelMap.put(&apos;_patientGuardiansSize&apos;, _patientGuardiansSize);
+                    var _i = 0;
+                    if (_patientGuardiansSize &gt; 0 &amp;&amp; _patientGuardians[_i].Person.Names[0].Givens[0].ENXP_ST!=&apos;&apos;) 
+                    {
+                        var patientcontact=patient.addContact();
+                        var _c=0;
+                        for (; _c &lt; _patientGuardiansSize; _c++) 
+                        {
+                            
+                            
+
+                            if (_patientGuardians[_i].Code.DisplayName != &apos;&apos; &amp;&amp; _patientGuardians[_i].Code.Code != &apos;&apos;) 
+                            {
+                                patientcontact.addRelationship().addCoding().setCode(_patientGuardians[_i].Code.Code).setDisplay(_patientGuardians[_i].Code.DisplayName).setSystem(_patientGuardians[_i].Code.CodeSystemName)
+                            }
+
+                            if (_patientGuardians[_i].Person.Names.length &gt; 0) 
+                            {
+                                patientcontact.setName(AddNameNode(_patientGuardians[_i].Person.Names));
+                                /*
+
+                                if(_patientGuardians[_i].Person.Names[0].Givens.length&gt;1)
+                                {
+                                    patientcontact.setName(new HumanName().setFamily(_patientGuardians[_i].Person.Names[0].Families[0].ENXP_ST).addGiven(_patientGuardians[_i].Person.Names[0].Givens[0].ENXP_ST).addGiven(_patientGuardians[_i].Person.Names[0].Givens[1].ENXP_ST));    
+                                }
+                                else
+                                {
+                                    patientcontact.setName(new HumanName().setFamily(_patientGuardians[_i].Person.Names[0].Families[0].ENXP_ST).addGiven(_patientGuardians[_i].Person.Names[0].Givens[0].ENXP_ST));    
+                                }*/
+
+                            }
+
+                            if (_patientGuardians[_i].Telecoms.length &gt; 0) 
+                            {
+                                patientcontact.setTelecom(AddTelecomNode(_patientGuardians[_i].Telecoms));
+                                /*
+                                for (var _t = 0; _t &lt; _patientGuardians[_i].Telecoms.length; _t++) 
+                                {
+                                    var ptelecom=patientcontact.addTelecom()
+                                    ptelecom.setValue(_patientGuardians[_i].Telecoms[_t].TEL_URL.Value)
+                                    if(_patientGuardians[_i].Telecoms[_t].TelecomAddress[0].Name!=&apos;&apos;)
+                                    {
+                                        ptelecom.setSystem(ContactPoint.ContactPointSystem.valueOf(MapTelecomSystem(_patientGuardians[_i].Telecoms[_t].TelecomAddress[0].Name)));
+                                        ptelecom.setUse(ContactPoint.ContactPointUse.valueOf(MapTelecomUse(_patientGuardians[_i].Telecoms[_t].TelecomAddress[0].Name)));
+                                    }
+
+                                }*/
+
+                            }
+
+                            if (_patientGuardians[_i].Address.length &gt; 0) 
+                            {
+                                /*
+                                var pcontactaddress=new Address();
+
+                                
+
+                                if(_patientGuardians[_i].Address[0].UsablePeriods[0].Value!=&apos;&apos;)
+                                {
+                                    pcontactaddress.setUse(Address.AddressUse.valueOf(MapAddressUse(_patientGuardians[_i].Address[0].PostalAddress[0].Value)))
+                                }
+                                
+                                if(_patientGuardians[_i].Address[0].StreetAddressLines[0].ADXP_ST!=&apos;&apos;)
+                                {
+                                    pcontactaddress.addLine(_patientGuardians[_i].Address[0].StreetAddressLines[0].ADXP_ST);
+                                }
+
+                                if(_patientGuardians[_i].Address[0].Cities[0].ADXP_ST!=&apos;&apos;)
+                                {
+                                    pcontactaddress.setCity(_patientGuardians[_i].Address[0].Cities[0].ADXP_ST)
+                                }
+
+                                if(_patientGuardians[_i].Address[0].States[0].ADXP_ST!=&apos;&apos;)
+                                {
+                                    pcontactaddress.setState(_patientGuardians[_i].Address[0].States[0].ADXP_ST);
+                                }
+                                
+                                if(_patientGuardians[_i].Address[0].Countries[0].ADXP_ST!=&apos;&apos;)
+                                {
+                                    pcontactaddress.setPostalCode(_patientGuardians[_i].Address[0].Countries[0].ADXP_ST);
+                                }
+
+                                if(_patientGuardians[_i].Address[0].Countries[0].ADXP_ST!=&apos;&apos;)
+                                {
+                                    pcontactaddress.setCountry(_patientGuardians[_i].Address[0].Countries[0].ADXP_ST);
+                                }
+                                
+                                
+                                patientcontact.setAddress(pcontactaddress);*/
+                                patientcontact.setAddress(AddAddressNode(_patientGuardians[_i].Address))
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
+        patient.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(patient))));
+        var oPatient=JSON.parse(parser.encodeResourceToString(patient));
+        //logger.info(patient.getId())
+        channelMap.put(&apos;patientid&apos;,&apos;Patient/&apos;+patient.getId());
+
+        SavefhirResource(patient,bundleId,null);
+        
+    }
+    return oPatient;
+}</code>
+  </properties>
+</codeTemplate>

@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>1c07dcff-6262-4cca-88c8-91fa777c48b2</id>
   <name>CoverageResource</name>
-  <revision>52</revision>
+  <revision>56</revision>
   <lastModified>
-    <time>1671036115285</time>
+    <time>1671726712070</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -69,7 +69,15 @@ function CoverageResource(arg1,text,patientid)
                 coverage.setSubscriberId(er1.Act.Ids[0].Extension);
             }
 
-            coverage.setType(new CodeableConcept().setCoding(GetCodingList(er1.Act.Code)));
+
+            var codinglist=GetCodingList(er1.Act.Code);
+
+            if(codinglist!=undefined)
+            {
+                coverage.setType(new CodeableConcept().setCoding(codinglist)); 
+            }
+            
+            
 
             for(var _perf=0;_perf&lt;er1.Act.Performers.length;_perf++)
             {

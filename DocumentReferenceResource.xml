@@ -1,0 +1,95 @@
+<codeTemplate version="3.12.0">
+  <id>72b8c78d-c950-4c0d-9b27-907efdcb2470</id>
+  <name>DocumentReferenceResource</name>
+  <revision>14</revision>
+  <lastModified>
+    <time>1671730214142</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function DocumentReferenceResource(arg1,patientid)
+{
+    
+    importPackage(org.hl7.fhir.r4.model);
+    var documentreference = new org.hl7.fhir.r4.model.DocumentReference();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    
+
+    if(arg1.clinicalItemKey!=&apos;&apos;)
+    {
+        documentreference.addIdentifier().setValue(arg1.clinicalItemKey);   
+    }
+    
+    documentreference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+    documentreference.setSubject(new Reference().setReference(patientid));
+
+    if(arg1.createdOn!=&apos;&apos;)
+    {
+    	if((arg1.createdOn.split(&apos;-&apos;)&gt;2) || arg1.createdOn.includes(&apos;+&apos;))
+    	{
+    		documentreference.setDateElement(InstantType(arg1.createdOn));	
+    	}
+    	else
+    	{
+    		documentreference.setDateElement(InstantType(arg1.createdOn+&apos;Z&apos;));
+    	}
+        
+    }
+
+
+    var content=new org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent();
+    var contentattachment=new org.hl7.fhir.r4.model.Attachment()
+
+    contentattachment.setDataElement(Base64BinaryType(arg1.data));
+    contentattachment.setTitle(arg1.label);
+    contentattachment.setContentType(arg1.mimeType);
+    content.setAttachment(contentattachment);
+    documentreference.addContent(content);
+    documentreference.setDescription(arg1.label);
+
+    var context=new org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent();
+    var period=new org.hl7.fhir.r4.model.Period();
+    
+    if(arg1.startTime!=&apos;&apos;)
+    {
+        period.setStartElement(DateTimeType(arg1.startTime));
+    }
+
+    if(arg1.endTime!=&apos;&apos;)
+    {
+        period.setEndElement(DateTimeType(arg1.endTime));
+    }
+    
+
+    
+    documentreference.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(documentreference))));
+    //var oDocumentReference=JSON.parse(parser.encodeResourceToString(documentreference));
+    //logger.info(&apos;documentreference-&gt;&apos;+parser.encodeResourceToString(documentreference));
+   
+
+
+    return documentreference;
+    
+
+}</code>
+  </properties>
+</codeTemplate>

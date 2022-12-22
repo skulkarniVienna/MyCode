@@ -1,0 +1,83 @@
+<codeTemplate version="3.12.0">
+  <id>ea0cd7de-ee71-42ab-b414-2ceb8c9a2826</id>
+  <name>GetCodingList</name>
+  <revision>26</revision>
+  <lastModified>
+    <time>1671728021417</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function GetCodingList(arg1)
+{
+    //logger.info(&apos;GetCodingList-&gt;&apos;+JSON.stringify(arg1))
+    importPackage(org.hl7.fhir.r4.model);
+	arg1=GetMergedCodeList(arg1);
+	//logger.info(&apos;GetCodingList-&gt;&apos;+JSON.stringify(arg1))
+    var result=[];
+
+    for(var _c=0;_c&lt;arg1.length&gt;0;_c++)
+    {
+        var temp=arg1[_c];
+
+        var coding=new Coding();
+        if(temp.CodeSystem!=&apos;&apos;)
+        {
+        	coding.setSystem(GetSystem(temp.CodeSystem));
+            
+        }
+
+        if(temp.Code!=&apos;&apos;)
+        {
+          coding.setCode(temp.Code);
+        }
+
+		if(temp.hasOwnProperty(&apos;DisplayName&apos;))
+		{
+			if(temp.DisplayName!=&apos;&apos;)
+        		{
+            
+            		coding.setDisplay(temp.DisplayName);
+        		}	
+		}
+          else if(temp.hasOwnProperty(&apos;OriginalText&apos;))
+        	{
+            if(temp.OriginalText.Text.trim()!=&apos;&apos;)
+            {
+                coding.setDisplay(temp.OriginalText.Text.trim());
+            }
+        	}
+
+        if(temp.DisplayName!=&apos;&apos; || temp.Code!=&apos;&apos;)
+        {
+        	//logger.info(&apos;GetCodingList-&gt;&apos;+temp.DisplayName+temp.Code)
+        	result.push(coding)	
+        }
+        
+    }
+    
+
+    
+    	return result;	
+    
+    
+             
+}  </code>
+  </properties>
+</codeTemplate>

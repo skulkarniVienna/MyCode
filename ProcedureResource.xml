@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>b9b28fe5-409d-4012-9e9b-d9d9b6980433</id>
   <name>ProcedureResource</name>
-  <revision>20</revision>
+  <revision>25</revision>
   <lastModified>
-    <time>1670694296620</time>
+    <time>1671728508420</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -74,7 +74,7 @@ function ProcedureResource(arg1,text,patientid)
         {
             if(arg1.EffectiveTime.Width.Value!=&apos;&apos;)
             {
-                procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/StructureDefinition/procedure-duration&apos;).setValue(new Duration().setValue(arg1.EffectiveTime.Width.Value).setUnit(arg1.EffectiveTime.Width.Unit))
+                procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/StructureDefinition/procedure-duration&apos;).setValue(new Duration().setValue(arg1.EffectiveTime.Width.Value).setUnit(arg1.EffectiveTime.Width.Unit).setCode(arg1.EffectiveTime.Width.Unit).setSystem(&apos;http://unitsofmeasure.org&apos;))
             }
         }
     }
@@ -173,13 +173,23 @@ function ProcedureResource(arg1,text,patientid)
         for(var _m=0;_m&lt;arg1.MethodCodes.length;_m++)
         {
             var method=arg1.MethodCodes[_m];
-            procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-method.html&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(method)));
+            var methodlist=GetCodingList(method);
+            if(methodlist!=undefined)
+            {
+            	procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-method.html&apos;).setValue(new CodeableConcept().setCoding(methodlist));	
+            }
+            
         }
    }
 
    if(arg1.hasOwnProperty(&apos;PriorityCode&apos;))
    {
-        procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-priority.html&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(arg1.PriorityCode)));
+        var prioritylist=GetCodingList(arg1.PriorityCode);
+        if(prioritylist!=undefined)
+        {
+        	procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-priority.html&apos;).setValue(new CodeableConcept().setCoding(prioritylist));	
+        }
+        
         
    }
    

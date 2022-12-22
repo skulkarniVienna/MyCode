@@ -1,0 +1,221 @@
+<codeTemplate version="3.12.0">
+  <id>aac72619-a521-42c0-9736-19d2aaecf551</id>
+  <name>AllergyIntoleranceResource</name>
+  <revision>64</revision>
+  <lastModified>
+    <time>1671632494287</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function AllergyIntoleranceResource(arg1,txt,patientid)
+{
+   var allergyresource = new org.hl7.fhir.r4.model.AllergyIntolerance();
+   var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+   var parser = ctx.newJsonParser();
+   
+   for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+   {
+      if(arg1.Ids[_id].Extension!=&apos;&apos;)
+      {
+            allergyresource.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);
+      }
+   }
+
+   if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+   {
+     allergyresource.setText(GetNarrative(txt))
+      
+   }
+     
+   var tempdate=GetEffectiveTimeInfo(arg1);
+      
+   if(tempdate.startdatetime!=&apos;&apos;)
+   {
+      allergyresource.setOnset(new DateTimeType((formatdate(tempdate.startdatetime))));   
+   }
+
+   if(arg1.Authors[0].Time.Value!=&apos;&apos;)
+   {
+      allergyresource.setRecordedDateElement(new DateTimeType((formatdate(arg1.Authors[0].Time.Value))));
+   }
+
+   
+   allergyresource.setPatient(new Reference().setReference(patientid));
+
+   var recorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+   if(recorder!= undefined)
+   {
+      allergyresource.addContained(recorder);  
+      
+      allergyresource.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(recorder.getId())));
+   }
+
+   var recorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor)
+   if(recorderperson!= undefined)
+   {
+      allergyresource.addContained(recorderperson);
+   }
+
+   var recorderorganization=AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+   if(recorderorganization!= undefined)
+   {
+      allergyresource.addContained(recorderorganization);
+   }
+   
+   
+   
+   
+
+   //Loop through Act.EntryRelationship
+   for(var _a_oe=0;_a_oe&lt;arg1.EntryRelationships.length;_a_oe++)
+   {
+      var temp_e_er=arg1.EntryRelationships[_a_oe];
+       
+      //start of EntryRelationship.Observation
+      if(temp_e_er.hasOwnProperty(&apos;Observation&apos;))
+      {
+
+         if(temp_e_er.TypeCode.Name==&apos;SUBJ&apos;)
+         {
+            var allergytype=GetMergedCodeList(temp_e_er.Observation.Code);
+            if(allergytype.length&gt;0)
+            {
+               allergyresource.setType(AllergyIntolerance.AllergyIntoleranceType.valueOf(MapAllergyType(allergytype[0])))   
+            }
+
+            if(temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.Code!=&apos;&apos; || temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.DisplayName!=&apos;&apos; || temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Text!=&apos;&apos;)
+            {
+               allergyresource.setCode(new CodeableConcept().setCoding(GetCodingList(temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code)))
+            }
+            else if(temp_e_er.Observation.Values[0].CD.OriginalText.Reference.TEL_URL.Value!=&apos;&apos;)
+            {
+               var allergycode=new Coding();
+               allergycode.setSystem(&apos;http://snomed.info/sct&apos;).setCode(&apos;716186003&apos;).setDisplay(&apos;No known allergy&apos;);
+               allergyresource.SetCode(CodeableConcept(allergycode))
+            }
+
+               //verificationStatus
+            allergyresource.setVerificationStatus(CodeableConcept(GetCoding(MapVerificationStatus(temp_e_er.Observation.StatusCode))));
+            allergyresource.setClinicalStatus(CodeableConcept(GetCoding(MapAllergyClinicalStatus(temp_e_er.Observation.StatusCode))));
+         }
+
+         var reaction=[];
+         
+         //Start of Observation.EntryRelationship
+         for(var _a_oe_oe=0;_a_oe_oe&lt;temp_e_er.Observation.EntryRelationships.length;_a_oe_oe++)
+         {
+            var temp_e_er_er=temp_e_er.Observation.EntryRelationships[_a_oe_oe];
+            
+            if(temp_e_er_er.TypeCode.Name==&apos;SUBJ&apos;)
+            {
+               //Clinicalstatus
+               if(temp_e_er_er.Observation.Code.Code==&apos;33999-4&apos;)
+               {
+                  var clinicalstatus=GetMergedCodeList(temp_e_er_er.Observation.Values[0].CD);
+                  if(clinicalstatus.length&gt;0)
+                  {
+                     allergyresource.setClinicalStatus(CodeableConcept(GetCoding(MapAllergyClinicalStatus(temp_e_er_er.Observation.Values[0].CD))))   
+                  }
+               }
+
+               //Criticality
+               if(temp_e_er_er.Observation.Code.Code==&apos;82606-5&apos;)
+               {
+                  allergyresource.setCriticality(AllergyIntolerance.AllergyIntoleranceCriticality.valueOf(MapAllergyCriticality(temp_e_er_er.Observation.Values[0].CD)))
+               }
+            }
+
+            
+            if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos; || temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
+            {
+
+                  
+                  //Reaction
+                  if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
+                  {
+                        //logic to check for multiple reactions  
+                        
+                        if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos;)
+                        {
+                              var reactioncomponent=new org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent();      
+                        }
+                        
+                        if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
+                        {
+                              for(var m=0;m&lt;temp_e_er_er.Observation.Values.length;m++)
+                              {
+                                    var reactionlist=GetMergedCodeList(temp_e_er_er.Observation.Values[m].CD);
+                                    if(reactionlist.length&gt;0)
+                                    {
+                                          reactioncomponent.addManifestation(CodeableConcept(GetCoding(reactionlist[0])));
+                                    }
+                              }//endlogic to check for multiple reactions
+
+                              //loop for 3 level Entry relationship
+                              for(var _a_oe3=0;_a_oe3&lt;temp_e_er_er.Observation.EntryRelationships.length;_a_oe3++)
+                              {
+                                    var temp_er3=temp_e_er_er.Observation.EntryRelationships[_a_oe3];
+
+                                    //severity
+                                    if(temp_er3.Observation.Code.Code==&apos;SEV&apos;)
+                                    {
+                                          if(temp_er3.Observation.Values[0].CD.Code!=&apos;&apos;)
+                                          {
+                                          
+                                                reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_er3.Observation.Values[0].CD)))
+                                          }
+                              
+                                    } //end of Severity
+                              }//end of 3rd EntryRelationship
+                        }
+                  }//end of reaction
+                  
+                  //Severity
+                  if(temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
+                  {
+                        
+                        reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_e_er_er.Observation.Values[0].CD)))
+                  }
+
+                  reaction.push(reactioncomponent)
+            }//end of MFST
+           
+      }//end of _a_oe_oe 
+
+      if(reaction.length&gt;0)
+      {
+            allergyresource.setReaction(removeDuplicates(reaction));
+      }
+
+
+      }//end onEntryRelationship.Observation
+   }//end of Act.EntryRelationship
+
+   allergyresource.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(allergyresource))));
+   //var oAllergy=JSON.parse(parser.encodeResourceToString(allergyresource));
+
+   return allergyresource;
+
+             
+}     
+            
+</code>
+  </properties>
+</codeTemplate>
