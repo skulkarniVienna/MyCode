@@ -1,0 +1,125 @@
+<codeTemplate version="3.12.0">
+  <id>e0ca4962-1177-45e9-82c7-b572515f7fbe</id>
+  <name>FamilyMemberHistoryResource</name>
+  <revision>11</revision>
+  <lastModified>
+    <time>1671800207203</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function FamilyMemberHistoryResource(arg1,txt,patientid)
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var familyhistory = new org.hl7.fhir.r4.model.FamilyMemberHistory();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            familyhistory.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+    }
+
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+        familyhistory.setText(GetNarrative(txt))
+    }
+
+    familyhistory.setStatus(FamilyMemberHistory.FamilyHistoryStatus.COMPLETED);
+    familyhistory.setPatient(new Reference().setReference(patientid));  
+
+    var relationshiplist=GetCodingList(arg1.Subject.RelatedSubject.Code);
+    if(relationshiplist!=undefined)
+    {
+        familyhistory.setRelationship(CodeableConcept().setCoding(relationshiplist));    
+    }
+    
+
+    var sex=GetCodingList(arg1.Subject.RelatedSubject.SubjectPerson.AdministrativeGenderCode);
+    if(sex!=undefined)
+    {
+        familyhistory.setSex(CodeableConcept().setCoding(sex));    
+    }
+
+    if(arg1.Subject.RelatedSubject.SubjectPerson.BirthTime.Value!=&apos;&apos;)
+    {
+        familyhistory.setBorn(new StringType(arg1.Subject.RelatedSubject.SubjectPerson.BirthTime.Value));    
+    }
+
+    if(arg1.Subject.RelatedSubject.SubjectPerson.DeceasedTime.Value!=&apos;&apos;)
+    {
+        familyhistory.setDeceased(new StringType(arg1.Subject.RelatedSubject.SubjectPerson.DeceasedTime.Value));    
+    }
+    
+    for(var _c=0;_c&lt;arg1.Components.length&gt;0;_c++)
+    {
+        var tempcondition=arg1.Components[_c].Observation
+
+        var conditioncomponent=new org.hl7.fhir.r4.model.FamilyMemberHistory.FamilyMemberHistoryConditionComponent();
+
+        var codelist=GetCodingList(tempcondition.Values[0].CD);
+        if(codelist!=undefined)
+        {
+            conditioncomponent.setCode(CodeableConcept(codelist));    
+        }
+        
+
+        for(var _er1=0;_er1&lt;tempcondition.EntryRelationships.length&gt;0;_er1++)
+        {
+            var er1=tempcondition.EntryRelationships[_er1];
+            if(er1.TypeCode.Name==&apos;CAUS&apos;)
+            {   
+                var outcome=GetCodingList(er1.Observation.Values[0].CD);
+                if(outcome!=undefined)
+                {
+                    conditioncomponent.setOutcome(CodeableConcept().setCoding(outcome));    
+                }
+            }
+
+            if(er1.TypeCode.Name==&apos;SUBJ&apos;)
+            {   
+                
+                if(er1.Observation.Code.Code==&apos;397659008&apos;)
+                {
+                    if(er1.Observation.Values[0].PQ.Value!=&apos;&apos;)
+                    {
+                        conditioncomponent.setOnset(new Age().setValue(er1.Observation.Values[0].PQ.Value).setCode(er1.Observation.Values[0].PQ.Unit));
+                    }
+                    
+                }
+            }    
+        }
+        
+
+        familyhistory.addCondition(conditioncomponent);
+    }
+    familyhistory.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(familyhistory))));
+    //var oFamilyHistory=JSON.parse(parser.encodeResourceToString(familyhistory));
+    
+    //logger.info(&apos;familyhistory-&gt;&apos;+parser.encodeResourceToString(familyhistory));
+    if(countkey(parser.encodeResourceToString(familyhistory))&gt;2)
+    {
+        return familyhistory
+    }
+}</code>
+  </properties>
+</codeTemplate>

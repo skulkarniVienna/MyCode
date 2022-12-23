@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>b9b28fe5-409d-4012-9e9b-d9d9b6980433</id>
   <name>ProcedureResource</name>
-  <revision>25</revision>
+  <revision>30</revision>
   <lastModified>
-    <time>1671728508420</time>
+    <time>1671805902990</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>DESTINATION_DISPATCHER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -43,6 +43,7 @@ function ProcedureResource(arg1,text,patientid)
         
     }
 
+    
     if(text!=&apos;&apos; &amp;&amp; GetNarrative(text)!=null)
     {
         procedure.setText(GetNarrative(text))
@@ -50,7 +51,13 @@ function ProcedureResource(arg1,text,patientid)
 
     procedure.setStatus(Procedure.ProcedureStatus.valueOf(MapProcedureStatus(arg1.StatusCode.Code)))
     
-    procedure.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+
+    var codinglist=GetCodingList(arg1.Code);
+    if(codinglist!=undefined)
+    {
+        procedure.setCode(new CodeableConcept().setCoding(codinglist));    
+    }
+    
     procedure.setSubject(new Reference().setReference(patientid));    
 
     var tempdate=GetEffectiveTimeInfo(arg1);
@@ -93,9 +100,10 @@ function ProcedureResource(arg1,text,patientid)
                 procedureperformer.setActor(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
                 
 
-                if(arg1.Authors[_a].FunctionCode.Code!=&apos;&apos;)
+                var functionlist=GetCodingList(arg1.Authors[_a].FunctionCode);
+                if(functionlist!=undefined)
                 {
-                    procedureperformer.setFunction(new CodeableConcept().setCoding(GetCodingList(arg1.Authors[_a].FunctionCode)));
+                    procedureperformer.setFunction(new CodeableConcept().setCoding(functionlist));
                 }
 
                 procedure.addPerformer(procedureperformer);
@@ -149,8 +157,12 @@ function ProcedureResource(arg1,text,patientid)
    {
         for(var _t=0;_t&lt;arg1.TargetSiteCodes.length;_t++)
         {
-            var target=arg1.TargetSiteCodes[_t];
-            procedure.addBodySite(new CodeableConcept().setCoding(GetCodingList(target)));
+            var target=GetCodingList(arg1.TargetSiteCodes[_t]);
+            if(target!=undefined)
+            {
+                procedure.addBodySite(new CodeableConcept().setCoding(target));    
+            }
+            
         }
 
    }
@@ -161,8 +173,12 @@ function ProcedureResource(arg1,text,patientid)
         for(var _s=0;_s&lt;arg1.Specimens.length;_s++)
        {
             var specimen=arg1.Specimens[_s];
-
-            procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/extension-procedure-specimen&apos;).setValue(new CodeableConcept().setCoding(GetCodingList(specimen.SpecimenRole.SpecimenPlayingEntity.Code)));
+            var specimenlist=GetCodingList(specimen.SpecimenRole.SpecimenPlayingEntity.Code);
+            if(specimenlist!=undefined)
+            {
+                procedure.addExtension().setUrl(&apos;http://hl7.org/fhir/us/core/StructureDefinition/extension-procedure-specimen&apos;).setValue(new CodeableConcept().setCoding(specimenlist));    
+            }
+            
 
        }
    }
@@ -176,7 +192,7 @@ function ProcedureResource(arg1,text,patientid)
             var methodlist=GetCodingList(method);
             if(methodlist!=undefined)
             {
-            	procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-method.html&apos;).setValue(new CodeableConcept().setCoding(methodlist));	
+                procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-method.html&apos;).setValue(new CodeableConcept().setCoding(methodlist));  
             }
             
         }
@@ -187,7 +203,7 @@ function ProcedureResource(arg1,text,patientid)
         var prioritylist=GetCodingList(arg1.PriorityCode);
         if(prioritylist!=undefined)
         {
-        	procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-priority.html&apos;).setValue(new CodeableConcept().setCoding(prioritylist));	
+            procedure.addExtension().setUrl(&apos;https://www.hl7.org/fhir/extension-procedure-priority.html&apos;).setValue(new CodeableConcept().setCoding(prioritylist));  
         }
         
         
@@ -264,11 +280,11 @@ function ProcedureResource(arg1,text,patientid)
             {
                 if(er1.Act.Text.Text!=&apos;&apos;)
                 {
-                    procedure.addNote().setText(er1.Act.Text.Text.trim()) ;
+                    procedure.addNote().setText(jsonencode(er1.Act.Text.Text.trim())) ;
                 }
-                else if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                else if(er1.Act.Text.Reference.TEL_URL.Value.trim()!=&apos;&apos;)
                 {
-                    procedure.addNote().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()) ;
+                    procedure.addNote().setText(jsonencode(er1.Act.Text.Reference.TEL_URL.Value.trim())) ;
                 }
             }
         }
@@ -289,12 +305,22 @@ function ProcedureResource(arg1,text,patientid)
         {
             if(er1.TypeCode.Name==&apos;RSON&apos;)
             {
-                procedure.addReasonCode(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)))
+                var reasonlist=GetCodingList(er1.Observation.Values[0].CD);
+                if(reasonlist!=undefined)
+                {
+                    procedure.addReasonCode(new CodeableConcept().setCoding(reasonlist))    
+                }
+                
             }
 
             if(er1.TypeCode.Name==&apos;COMP&apos;)
             {
-                procedure.addComplication(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)))
+                var complicationlist=GetCodingList(er1.Observation.Values[0].CD);
+                if(complicationlist!=undefined)
+                {
+                    procedure.addComplication(new CodeableConcept().setCoding(complicationlist))    
+                }
+                
             }
         }
     }

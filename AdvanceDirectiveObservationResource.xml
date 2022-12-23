@@ -1,0 +1,108 @@
+<codeTemplate version="3.12.0">
+  <id>702d8f66-3f9b-4067-9807-6fafc170c0e1</id>
+  <name>AdvanceDirectiveObservationResource</name>
+  <revision>19</revision>
+  <lastModified>
+    <time>1671799954966</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function AdvanceDirectiveObservationResource(arg1,txt,patientid)
+{
+    importPackage(org.hl7.fhir.r4.model);
+    var observation = new org.hl7.fhir.r4.model.Observation();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+   
+    for(var _id=0;_id&lt;arg1.Ids.length;_id++)
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            observation.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }  
+    }
+
+    if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+    {
+        observation.setText(GetNarrative(txt))
+    }
+
+    observation.setStatus(Observation.ObservationStatus.FINAL);
+    observation.addCategory(new CodeableConcept(new Coding().setCode(&apos;42348-3&apos;).setDisplay(&apos;Advance Directives&apos;).setSystem(&apos;http://terminology.hl7.org/CodeSystem/observation-category&apos;)));
+    
+    
+    observation.setCode(CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+    observation.setSubject(new Reference().setReference(patientid));    
+
+    var tempdate=GetEffectiveTimeInfo(arg1);
+    if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        observation.setEffective(new DateTimeType(formatdate(tempdate.startdatetime)));
+    }
+
+    var observedvalue=GetCodingList(arg1.Values[0].CD);
+    if(observedvalue!=undefined)
+    {
+        observation.setValue(CodeableConcept().setCoding(observedvalue));
+    }
+
+
+    for(var _p=0;_p&lt;arg1.Participants.length&gt;0;_p++)
+    {
+        var participant=arg1.Participants[_p];
+        if(participant.TypeCode.Name==&apos;VRF&apos;)
+        {
+            var tempparticipant=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempparticipant!=undefined)
+            {
+                var authenticator=&apos;#&apos;+new Resource(tempparticipant.getId());
+                observation.addContained(tempparticipant);        
+            }
+            
+        }
+
+        if(participant.TypeCode.Name==&apos;CST&apos;)
+        {
+            var tempcustodian=ParticipanttoPractictioner(participant.ParticipantRole);
+            if(tempcustodian!=undefined)
+            {
+                var custodian=&apos;#&apos;+new Resource(tempcustodian.getId());
+                observation.addContained(tempcustodian);        
+            }
+            
+        }
+    }
+
+    for(var _r=0;_r&lt;arg1.References.length;_r++)
+    {
+        var tempreference=arg1.References[_r];
+        
+        var tempdocument=ExternalDocumentReference(tempreference,patientid,authenticator,custodian);
+        if(tempdocument!=undefined)
+        {
+            observation.addDerivedFrom(new Reference().setReference(&apos;#&apos;+new Resource(tempdocument.getId())));
+            observation.addContained(tempdocument);    
+        }
+        
+    }   
+
+    observation.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(observation))));
+    //var oObservation=JSON.parse(parser.encodeResourceToString(observation));
+    //logger.info(&apos;EncounterResource-&gt;&apos;+parser.encodeResourceToString(encounter));
+
+    return observation;
+    
+
+}</code>
+  </properties>
+</codeTemplate>

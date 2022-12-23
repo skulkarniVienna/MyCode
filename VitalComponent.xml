@@ -1,17 +1,17 @@
 <codeTemplate version="3.12.0">
   <id>9eacf259-f72c-4aeb-9c1a-3d22b3c56a30</id>
   <name>VitalComponent</name>
-  <revision>39</revision>
+  <revision>43</revision>
   <lastModified>
-    <time>1671191292913</time>
+    <time>1671801949130</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
@@ -38,8 +38,12 @@
 
  
    
-   //logger.info(&apos;ObservationResource 2&apos;);
-   observation.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+   var codelist=GetCodingList(arg1.Code);
+   if(codelist!=undefined)
+   {
+        observation.setCode(new CodeableConcept().setCoding(codelist)); 
+   }
+   
    observation.setSubject(new Reference().setReference(patientid));    
 
    var tempdate=GetEffectiveTimeInfo(arg1);
@@ -76,12 +80,12 @@
     {
         for(var _i=0;_i&lt;arg1.InterpretationCode.length;_i++)
         {
-            var tempinterpretation=arg1.InterpretationCode[_i];
+            var tempinterpretation=GetCodingList(arg1.InterpretationCode[_i]);
               
-            if(GetCodingList(tempinterpretation).length&gt;0)
+            if(tempinterpretation!=undefined)
             {
                 //component.addInterpretation(new CodeableConcept().setCoding(GetCodingList(tempinterpretation)))
-                observation.addInterpretation(new CodeableConcept().setCoding(GetCodingList(tempinterpretation)))
+                observation.addInterpretation(new CodeableConcept().setCoding(tempinterpretation));
             }
         }
             
@@ -99,13 +103,13 @@
             {
                 if(temprefrange.ObservationRange.Text.Text!=&apos;&apos;)
                 {
-                    referencerange.setText(temprefrange.ObservationRange.Text.Text.trim());  
+                    referencerange.setText(jsonencode(temprefrange.ObservationRange.Text.Text.trim()));  
                 }
                 else if(temprefrange.ObservationRange.Text.hasOwnProperty(&apos;Reference&apos;))
                 {
                     if(temprefrange.ObservationRange.Text.Reference.TEL_URL.Value!=&apos;&apos;)
                     {
-                        referencerange.setText(temprefrange.ObservationRange.Text.Reference.TEL_URL.Value.trim());
+                        referencerange.setText(jsonencode(temprefrange.ObservationRange.Text.Reference.TEL_URL.Value.trim()));
                     }
                 }
 
@@ -250,11 +254,13 @@
             {
                 if(er1.Act.Text.Text!=&apos;&apos;)
                 {
-                  observation.addNote().setText(er1.Act.Text.Text.trim()) ;
+
+                  observation.addNote().setText(jsonencode(er1.Act.Text.Text.trim())) ;
                 }
-                else if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                else if(er1.Act.Text.Reference.TEL_URL.Value.trim()!=&apos;&apos;)
                 {
-                  observation.addNote().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()) ;
+                   // logger.info(jsonencode(er1.Act.Text.Reference.TEL_URL.Value.trim()))
+                  observation.addNote().setText(jsonencode(er1.Act.Text.Reference.TEL_URL.Value.trim())) ;
                 }
             }
          }

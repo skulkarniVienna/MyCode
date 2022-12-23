@@ -3,7 +3,7 @@
   <nextMetaDataId>2</nextMetaDataId>
   <name>Composition Builder</name>
   <description></description>
-  <revision>106</revision>
+  <revision>109</revision>
   <sourceConnector version="3.12.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
@@ -146,7 +146,7 @@ try
             while(result1.next())
             {
                 var entry=new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent();
-                //logger.info(&apos;Composition Builder-&gt;&apos;+result1.getString(&quot;resourceId&quot;))
+                logger.info(&apos;Composition Builder-&gt;&apos;+result1.getString(&quot;resourceId&quot;))
                 //logger.info(&apos;Composition Builder-&gt;&apos;+parser.parseResource(result1.getString(&quot;resourcedata&quot;)))
                 entry.setResource(parser.parseResource(result1.getString(&quot;resourcedata&quot;)));
                 entry.setFullUrl(&apos;https://dw-test.genzeon.com/api/&apos;+result1.getString(&quot;resourceType&quot;)+&apos;/&apos;+result1.getString(&quot;resourceId&quot;))
@@ -527,7 +527,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1671644262868</time>
+        <time>1671804908006</time>
         <timezone>Asia/Calcutta</timezone>
       </lastModified>
       <pruningSettings>

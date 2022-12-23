@@ -1,0 +1,38 @@
+<codeTemplate version="3.12.0">
+  <id>0b65c663-0ef7-4865-a60c-57f78010fc10</id>
+  <name>jsonencode</name>
+  <revision>7</revision>
+  <lastModified>
+    <time>1671797046139</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function jsonencode(str)
+{
+    
+    arg1=String(str);
+
+    arg1=arg1.replace(/&quot;/g,&apos;\\\\\\&quot;&apos;);
+    return arg1;
+    
+
+}</code>
+  </properties>
+</codeTemplate>

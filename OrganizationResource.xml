@@ -1,0 +1,141 @@
+<codeTemplate version="3.12.0">
+  <id>a55ffa53-02c9-4831-9fa4-0632768095e7</id>
+  <name>OrganizationResource</name>
+  <revision>23</revision>
+  <lastModified>
+    <time>1671799809551</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function OrganizationResource(arg1)
+{
+    //logger.info(&apos;OrganizationResource-&gt;&apos;+JSON.stringify(arg1))
+    importPackage(org.hl7.fhir.r4.model);
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();
+    
+   
+      var organization = new org.hl7.fhir.r4.model.Organization();
+      if(arg1.Names.length&gt;0)
+      {
+         if(arg1.Names[0].Text!=&apos;&apos;)
+      {
+         
+            for (var _id = 0; _id &lt; arg1.Ids.length; _id++) 
+            {
+               if(arg1.Ids[_id].Extension!=&apos;&apos;)
+               {
+                  organization.addIdentifier().setSystem(&quot;urn:oid:&quot;+arg1.Ids[_id].Root).setValue(arg1.Ids[_id].Extension);   
+               }
+               
+            }
+   
+            for (var _n = 0; _n &lt; arg1.Names.length; _n++) 
+            {
+   
+               if(arg1.Names[_n].Text!=&apos;&apos; &amp;&amp; arg1.Names[_n].Text!=&apos;&quot;&quot;&apos;)
+               {
+                  organization.setName(jsonencode(arg1.Names[_n].Text.trim()));
+               }
+            }
+   
+            
+   
+            for (var _ot = 0; _ot &lt; arg1.Telecoms.length; _ot++) 
+            {
+               
+               var orgtelecom=organization.addTelecom()
+               if(arg1.Telecoms[_ot].TEL_URL.Value!=&apos;&apos;)
+               {
+                orgtelecom.setValue(arg1.Telecoms[_ot].TEL_URL.Value)   
+               }
+
+               if(arg1.Telecoms[_ot].TelecomAddress[0].Name!=&apos;&apos;)
+               {
+                orgtelecom.setSystem(ContactPoint.ContactPointSystem.valueOf(MapTelecomSystem(arg1.Telecoms[_ot].TelecomAddress[0].Name))); 
+               }
+
+               if(arg1.Telecoms[_ot].TelecomAddress[0].Name!=&apos;&apos;)
+               {
+                orgtelecom.setUse(ContactPoint.ContactPointUse.valueOf(MapTelecomUse(arg1.Telecoms[_ot].TelecomAddress[0].Name)));  
+               }
+               
+   
+            }
+
+
+            organization.setAddress(AddAddressNode(arg1.Address));
+
+            /*
+   
+            for (var _oa = 0; _oa &lt; arg1.Address.length; _oa++) 
+            {
+               orgaddr=organization.addAddress();
+   
+               if(arg1.Address[_oa].Cities[0].Name!=&apos;&apos; &amp;&amp; MapAddressUse(arg1.Address[_oa].Cities[0].Name)!=null)
+               {
+                  orgaddr.setUse(Address.AddressUse.valueOf(MapAddressUse(arg1.Address[_oa].Cities[0].Name)))
+               }
+                               
+               if(arg1.Address[_oa].StreetAddressLines[0].ADXP_ST!=&apos;&apos;)
+               {
+                  orgaddr.addLine(arg1.Address[_oa].StreetAddressLines[0].ADXP_ST.trim());
+               }
+   
+               if(arg1.Address[_oa].Cities[0].ADXP_ST!=&apos;&apos;)
+               {
+                  orgaddr.setCity(arg1.Address[_oa].Cities[0].ADXP_ST)
+               }
+   
+               if(arg1.Address[_oa].States[0].ADXP_ST!=&apos;&apos;)
+               {
+                  orgaddr.setState(arg1.Address[_oa].States[0].ADXP_ST);
+               }
+                               
+               if(arg1.Address[_oa].PostalCodes[0].ADXP_ST!=&apos;&apos;)
+               {
+                  orgaddr.setPostalCode(arg1.Address[_oa].PostalCodes[0].ADXP_ST);
+               }
+   
+               if(arg1.Address[_oa].Countries[0].ADXP_ST!=&apos;&apos;)
+               {
+                  orgaddr.setCountry(arg1.Address[_oa].Countries[0].ADXP_ST);
+               }
+   
+            }
+            */
+         
+         }
+
+      }
+      
+   
+   organization.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(organization))));
+     
+   if(countkey(parser.encodeResourceToString(organization))&gt;2)
+   {
+    return organization
+   }
+         
+}     
+            
+</code>
+  </properties>
+</codeTemplate>

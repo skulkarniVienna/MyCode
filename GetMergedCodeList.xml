@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>8e6365bf-e95e-41d3-930a-9d759b248966</id>
   <name>GetMergedCodeList</name>
-  <revision>22</revision>
+  <revision>25</revision>
   <lastModified>
-    <time>1671726615238</time>
+    <time>1671805887686</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>DESTINATION_DISPATCHER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -47,6 +47,7 @@ function GetMergedCodeList(arg1)
                         if(arg1.OriginalText.Reference.TEL_URL.Value!=&apos;&apos;)
                         {
                             referencetext=arg1.OriginalText.Reference.TEL_URL.Value
+                            
                              if(log==1)
                             {   
                                 logger.info(&apos;GetMergedCodeList:referencetext-&gt;&apos;+    referencetext)

@@ -1,17 +1,17 @@
 <codeTemplate version="3.12.0">
   <id>bb55803a-fefe-4bb1-b9dc-aabbd5db0033</id>
   <name>ResultResource</name>
-  <revision>19</revision>
+  <revision>22</revision>
   <lastModified>
-    <time>1671191619129</time>
+    <time>1671801437225</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
@@ -40,7 +40,13 @@
 */
     diagnosticreport.setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(MapResultStatus(arg1.StatusCode.Code)));
 
-    diagnosticreport.setCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));
+    
+    var codinglist=GetCodingList(arg1.Code);
+    if(codinglist!=undefined)
+    {
+        diagnosticreport.setCode(new CodeableConcept().setCoding(codinglist));    
+    }
+    
     diagnosticreport.setSubject(new Reference().setReference(patientid));    
 
     var tempdate=GetEffectiveTimeInfo(arg1);

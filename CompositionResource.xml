@@ -1,0 +1,119 @@
+<codeTemplate version="3.12.0">
+  <id>caf126fc-1371-4852-a025-d87595c7fbc1</id>
+  <name>CompositionResource</name>
+  <revision>19</revision>
+  <lastModified>
+    <time>1671799865941</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>function CompositionResource(arg1,patientid,bundleId)
+{
+    
+   importPackage(org.hl7.fhir.r4.model);
+    var composition = new org.hl7.fhir.r4.model.Composition();
+    var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+    var parser = ctx.newJsonParser();  
+   
+    if(arg1.Id.Extension!=&apos;&apos;)
+    {
+            
+        composition.setIdentifier(new Identifier().setSystem(GetSystem(arg1.Id.Root)).setValue(arg1.Id.Extension));   
+    }  
+    
+    
+    composition.setStatus(Composition.CompositionStatus.FINAL);
+
+    var typelist=GetCodingList(arg1.Code);
+    if(typelist!=undefined)
+    {
+        composition.setType(new CodeableConcept().setCoding(typelist));    
+    }
+    
+    composition.setSubject(new Reference().setReference(patientid)); 
+
+    if(arg1.Effective.Value!=&apos;&apos;)
+    {
+        composition.setDateElement(new DateTimeType(formatdate(arg1.Effective.Value)))    
+    }  
+    
+    composition.setTitle(arg1.Title);
+
+    if(arg1.ConfidentialityCode.Code!=&apos;&apos;)
+    {
+        composition.setConfidentiality(Composition.DocumentConfidentiality.valueOf(MapConfidentiality(arg1.ConfidentialityCode.Code)))
+    }
+
+
+    var tempcustodian=ParticipanttoOrganization(arg1.Custodian.AssignedCustodian.CustodianOrganization);
+    if(tempcustodian!=undefined)
+    {
+        composition.addContained(tempcustodian)
+        composition.setCustodian(new Reference().setReference(&apos;#&apos;+new Resource(tempcustodian.getId())))
+    }
+
+    if(arg1.DocumentationOfs.length&gt;0)
+    {
+        if(arg1.DocumentationOfs[0].ServiceEvent.IVL_TS.Low.TS.Value!=&apos;&apos;)
+        {
+            var period=new Period()
+            period.setStartElement(new DateTimeType(formatdate(arg1.DocumentationOfs[0].ServiceEvent.IVL_TS.Low.TS.Value)))
+
+            if(arg1.DocumentationOfs[0].ServiceEvent.IVL_TS.High.TS.Value!=&apos;&apos;)
+            {
+                period.setEndElement(new DateTimeType(formatdate(arg1.DocumentationOfs[0].ServiceEvent.IVL_TS.High.TS.Value)))    
+            }
+
+            composition.addEvent(new org.hl7.fhir.r4.model.Composition.CompositionEventComponent().setPeriod(period));
+            
+        }
+    }
+   
+    for(var _a=0;_a&lt;arg1.Authors.length;_a++)
+    {
+        var tempauthor=arg1.Authors[_a];
+
+        /Author Block Start/
+        var tauthor=AuthortoPractictionerRole(tempauthor.AssignedAuthor);
+        if(tauthor!= undefined)
+        {
+            composition.addContained(tauthor);    
+            composition.addAuthor(new Reference().setReference(&apos;#&apos;+new Resource(tauthor.getId())));
+        }
+
+        var tauthorperson=AuthortoPractictioner(tempauthor.AssignedAuthor);
+        if(tauthorperson!= undefined)
+        {
+            composition.addContained(tauthorperson);
+        }
+                 
+        var tauthorg=AuthortoOrganization(tempauthor.AssignedAuthor.Organization);
+        if(tauthorg!= undefined)
+        {
+            composition.addContained(tauthorg);
+        }
+
+        /Author Block End/
+
+    }
+
+    var oComposition=JSON.parse(parser.encodeResourceToString(composition));
+
+    //SavefhirResource(parser.encodeResourceToString(composition),composition.getId(),&apos;Composition&apos;,bundleId,null);
+    SavefhirResource(composition,bundleId,null);
+    
+    return oComposition;
+    
+}</code>
+  </properties>
+</codeTemplate>
