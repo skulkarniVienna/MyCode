@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>b9949088-857f-4ca2-8f79-0829dcef4ff5</id>
   <name>MapRace</name>
-  <revision>3</revision>
+  <revision>8</revision>
   <lastModified>
-    <time>1671641492490</time>
+    <time>1672231172717</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>DESTINATION_DISPATCHER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -21,27 +21,35 @@
 {
     var obj=new Coding();
     
+    var racelist=GetMergedCodeList(arg1);
+
+    for(var _r=0;_r&lt;racelist.length;_r++)
+    {
+        arg1=racelist[_r];
+        //logger.info(&apos;MapRace-&gt;&apos;+JSON.stringify(String(arg1.Code).split(&quot;-&quot;)));
+        if(String(arg1.Code).split(&quot;-&quot;).length&gt;=2)
+        {
+        		//logger.info(&apos;MapRace-&gt;&apos;+arg1.Code);
+            obj.setSystem(&apos;urn:oid:2.16.840.1.113883.6.238&apos;);
+            obj.setCode(arg1.Code);
+            obj.setDisplay(arg1.DisplayName);
+        }
+        else if(arg1.Code==&apos;U&apos;)
+        {
+            obj.setSystem(&apos;http://terminology.hl7.org/CodeSystem/v3-NullFlavor&apos;);
+            obj.setCode(&apos;UNK&apos;);
+            obj.setDisplay(&apos;Unknown&apos;);
+        }
+        else if (arg1.Code!=&apos;&apos; || arg1.DisplayName!=&apos;&apos;)
+        {
+            obj.setSystem(&apos;urn:oid:&apos;+arg1.CodeSystem);
+            obj.setCode(arg1.Code);
+            obj.setDisplay(arg1.DisplayName);;
+        }
     
-
-    if(String(arg1.Code).split(&quot;-&quot;).length - 1&gt;2)
-    {
-        obj.setSystem(&apos;urn:oid:2.16.840.1.113883.6.238&apos;);
-        obj.setCode(arg1.Code);
-        obj.setDisplay(arg1.DisplayName);
-    }
-    else if(arg1.Code==&apos;U&apos;)
-    {
-    		 obj.setSystem(&apos;http://terminology.hl7.org/CodeSystem/v3-NullFlavor&apos;);
-        	obj.setCode(&apos;UNK&apos;);
-        	obj.setDisplay(&apos;Unknown&apos;);
-    }
-    else
-    {
-    		 obj.setSystem(&apos;urn:oid:&apos;+arg1.CodeSystem);
-        	obj.setCode(arg1.Code);
-        	obj.setDisplay(arg1.DisplayName);;
     }
 
+    
     return obj;
 }</code>
   </properties>
