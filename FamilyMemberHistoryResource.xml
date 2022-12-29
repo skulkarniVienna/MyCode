@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>e0ca4962-1177-45e9-82c7-b572515f7fbe</id>
   <name>FamilyMemberHistoryResource</name>
-  <revision>11</revision>
+  <revision>12</revision>
   <lastModified>
-    <time>1671800207203</time>
+    <time>1672330454063</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>SOURCE_RECEIVER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -79,7 +79,7 @@ function FamilyMemberHistoryResource(arg1,txt,patientid)
         var codelist=GetCodingList(tempcondition.Values[0].CD);
         if(codelist!=undefined)
         {
-            conditioncomponent.setCode(CodeableConcept(codelist));    
+            conditioncomponent.setCode(CodeableConcept().setCoding(codelist));    
         }
         
 

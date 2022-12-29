@@ -1,0 +1,73 @@
+<codeTemplate version="3.12.0">
+  <id>240d7479-ebde-49c9-a93b-1921271cae56</id>
+  <name>FunctionalStatusBundle</name>
+  <revision>8</revision>
+  <lastModified>
+    <time>1672333946562</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+/**
+   Modify the description here. Modify the function name and parameters as needed. One function per
+   template is recommended; create a new code template for each new function.
+
+   @param {String} arg1 - arg1 description
+   @return {String} return description
+*/
+function FunctionalStatusBundle(arg1,text,patientid,bundleId) 
+{
+   
+    
+   var obj=JSON.parse(arg1);
+   
+   if(obj.Entries.length&gt;0)
+   {
+      var bundle={};
+       bundle.resourceType=&apos;Bundle&apos;;
+       bundle.type=&apos;batch&apos;;
+       bundle.timestamp= DateUtil.getCurrentDate(&quot;yyyy-MM-dd HH:mm:ss&quot;);
+       bundle.total=obj.Entries.length;
+       bundle.entry=[];
+   }
+   
+
+   //looping through entries
+   for(var _a=0;_a&lt;obj.Entries.length;_a++)
+   {
+      if(obj.Entries[_a].hasOwnProperty(&apos;Observation&apos;))
+      {
+      	if(countkey(obj.Entries[_a].Observation&gt;0))
+      	{
+      		var temp={};
+	        temp.resource=ObservationResource(obj.Entries[_a].Observation,text,patientid,obj.Code);
+	        SavefhirResource(temp.resource,bundleId,obj.Code);
+	        bundle.entry.push(temp)	
+      	}
+        
+      }
+   }  
+
+   //logger.info(&apos;FunctionalStatusBundle-&gt;&apos;+JSON.stringify(bundle)) 
+      
+}
+    
+</code>
+  </properties>
+</codeTemplate>

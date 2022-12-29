@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>e9c3a683-6f98-4e5f-8867-35f41469773c</id>
   <name>MapEthnicity</name>
-  <revision>4</revision>
+  <revision>13</revision>
   <lastModified>
-    <time>1672231293727</time>
+    <time>1672327382559</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -22,32 +22,39 @@
     var obj=new Coding();
     
     var ethnicitylist=GetMergedCodeList(arg1);
+  // logger.info(&apos;MapEthnicity-&gt;&apos;+JSON.stringify(ethnicitylist))
+    
     
     for(var _e=0;_e&lt;ethnicitylist.length;_e++)
     {
     	arg1=ethnicitylist[_e];
-    	if(String(arg1.Code).split(&quot;-&quot;).length&gt;2)
+    	if(String(arg1.Code).split(&quot;-&quot;).length&gt;1)
 	    {
 	        obj.setSystem(&apos;urn:oid:2.16.840.1.113883.6.238&apos;);
 	        obj.setCode(arg1.Code);
 	        obj.setDisplay(arg1.DisplayName);
+	        break;
 	    }
 	    else if(arg1.Code==&apos;U&apos;)
 	    {
 	    		obj.setSystem(&apos;http://terminology.hl7.org/CodeSystem/v3-NullFlavor&apos;);
 	        	obj.setCode(&apos;UNK&apos;);
 	        	obj.setDisplay(&apos;Unknown&apos;);
+	        	break;
 	    }
 	    else if (arg1.Code!=&apos;&apos; || arg1.DisplayName!=&apos;&apos;)
         {
-            obj.setSystem(&apos;urn:oid:&apos;+arg1.CodeSystem);
+            obj.setSystem(GetSystem(arg1.CodeSystem));
             obj.setCode(arg1.Code);
             obj.setDisplay(arg1.DisplayName);;
         }	
-    }
-    
 
-    return obj;
+        
+    }
+
+    return obj; 
+    
+    
 }</code>
   </properties>
 </codeTemplate>
