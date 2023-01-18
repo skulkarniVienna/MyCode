@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>e0ca4962-1177-45e9-82c7-b572515f7fbe</id>
   <name>FamilyMemberHistoryResource</name>
-  <revision>12</revision>
+  <revision>13</revision>
   <lastModified>
-    <time>1672330454063</time>
+    <time>1674055057784</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-      <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
       <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -88,24 +88,32 @@ function FamilyMemberHistoryResource(arg1,txt,patientid)
             var er1=tempcondition.EntryRelationships[_er1];
             if(er1.TypeCode.Name==&apos;CAUS&apos;)
             {   
-                var outcome=GetCodingList(er1.Observation.Values[0].CD);
-                if(outcome!=undefined)
+                if(er1.hasOwnProperty(&apos;Observation&apos;))
                 {
-                    conditioncomponent.setOutcome(CodeableConcept().setCoding(outcome));    
+                    var outcome=GetCodingList(er1.Observation.Values[0].CD);
+                    if(outcome!=undefined)
+                    {
+                        conditioncomponent.setOutcome(CodeableConcept().setCoding(outcome));    
+                    }    
                 }
+                
             }
 
             if(er1.TypeCode.Name==&apos;SUBJ&apos;)
             {   
-                
-                if(er1.Observation.Code.Code==&apos;397659008&apos;)
+                if(er1.hasOwnProperty(&apos;Observation&apos;))
                 {
-                    if(er1.Observation.Values[0].PQ.Value!=&apos;&apos;)
+                    if(er1.Observation.Code.Code==&apos;397659008&apos;)
                     {
-                        conditioncomponent.setOnset(new Age().setValue(er1.Observation.Values[0].PQ.Value).setCode(er1.Observation.Values[0].PQ.Unit));
-                    }
-                    
+                        if(er1.Observation.Values[0].PQ.Value!=&apos;&apos;)
+                        {
+                            conditioncomponent.setOnset(new Age().setValue(er1.Observation.Values[0].PQ.Value).setCode(er1.Observation.Values[0].PQ.Unit));
+                        }
+                        
+                    }    
                 }
+                
+                
             }    
         }
         

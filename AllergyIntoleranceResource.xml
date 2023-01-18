@@ -1,15 +1,15 @@
 <codeTemplate version="3.12.0">
   <id>aac72619-a521-42c0-9736-19d2aaecf551</id>
   <name>AllergyIntoleranceResource</name>
-  <revision>64</revision>
+  <revision>70</revision>
   <lastModified>
-    <time>1671632494287</time>
+    <time>1674056284743</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
@@ -89,8 +89,8 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
       var temp_e_er=arg1.EntryRelationships[_a_oe];
        
       //start of EntryRelationship.Observation
-      if(temp_e_er.hasOwnProperty(&apos;Observation&apos;))
-      {
+        if(temp_e_er.hasOwnProperty(&apos;Observation&apos;))
+        {
 
          if(temp_e_er.TypeCode.Name==&apos;SUBJ&apos;)
          {
@@ -100,9 +100,10 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
                allergyresource.setType(AllergyIntolerance.AllergyIntoleranceType.valueOf(MapAllergyType(allergytype[0])))   
             }
 
-            if(temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.Code!=&apos;&apos; || temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.DisplayName!=&apos;&apos; || temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code.OriginalText.Text!=&apos;&apos;)
+            var codinglist=GetCodingList(temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code)
+            if(codinglist!=undefined)
             {
-               allergyresource.setCode(new CodeableConcept().setCoding(GetCodingList(temp_e_er.Observation.Participants[0].ParticipantRole.PlayingEntity.Code)))
+               allergyresource.setCode(new CodeableConcept().setCoding(codinglist));
             }
             else if(temp_e_er.Observation.Values[0].CD.OriginalText.Reference.TEL_URL.Value!=&apos;&apos;)
             {
@@ -112,8 +113,18 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
             }
 
                //verificationStatus
-            allergyresource.setVerificationStatus(CodeableConcept(GetCoding(MapVerificationStatus(temp_e_er.Observation.StatusCode))));
-            allergyresource.setClinicalStatus(CodeableConcept(GetCoding(MapAllergyClinicalStatus(temp_e_er.Observation.StatusCode))));
+            var verificationstatuslist=GetMappedCodingList(temp_e_er.Observation.StatusCode,MapVerificationStatus);
+            if(verificationstatuslist!=undefined)
+            {
+                allergyresource.setVerificationStatus(new CodeableConcept().setCoding(verificationstatuslist));    
+            }
+            
+            var clinicalstatuslist=GetMappedCodingList(temp_e_er.Observation.StatusCode,MapAllergyClinicalStatus);
+            if(clinicalstatuslist!=undefined)
+            {
+                allergyresource.setClinicalStatus(CodeableConcept().setCoding(clinicalstatuslist));    
+            }
+            
          }
 
          var reaction=[];
@@ -125,77 +136,88 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
             
             if(temp_e_er_er.TypeCode.Name==&apos;SUBJ&apos;)
             {
-               //Clinicalstatus
-               if(temp_e_er_er.Observation.Code.Code==&apos;33999-4&apos;)
-               {
-                  var clinicalstatus=GetMergedCodeList(temp_e_er_er.Observation.Values[0].CD);
-                  if(clinicalstatus.length&gt;0)
-                  {
-                     allergyresource.setClinicalStatus(CodeableConcept(GetCoding(MapAllergyClinicalStatus(temp_e_er_er.Observation.Values[0].CD))))   
-                  }
-               }
+               
+                if(temp_e_er_er.hasOwnProperty(&apos;Observation&apos;))
+                {
+                    //Clinicalstatus
+                   if(temp_e_er_er.Observation.Code.Code==&apos;33999-4&apos;)
+                   {
+                      var clinicalstatus=GetMappedCodingList(temp_e_er_er.Observation.Values[0].CD,MapAllergyClinicalStatus);
+                      if(clinicalstatus!=undefined)
+                      {
+                         allergyresource.setClinicalStatus(CodeableConcept().setCoding(clinicalstatus))   
+                      }
+                   } 
+                   
+                   //Criticality
+                   if(temp_e_er_er.Observation.Code.Code==&apos;82606-5&apos;)
+                   {
+                      allergyresource.setCriticality(AllergyIntolerance.AllergyIntoleranceCriticality.valueOf(MapAllergyCriticality(temp_e_er_er.Observation.Values[0].CD)))
+                   }    
 
-               //Criticality
-               if(temp_e_er_er.Observation.Code.Code==&apos;82606-5&apos;)
-               {
-                  allergyresource.setCriticality(AllergyIntolerance.AllergyIntoleranceCriticality.valueOf(MapAllergyCriticality(temp_e_er_er.Observation.Values[0].CD)))
-               }
+                   if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos; || temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
+                    {
+
+                          
+                          //Reaction
+                          if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
+                          {
+                                //logic to check for multiple reactions  
+                                
+                                if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos;)
+                                {
+                                      var reactioncomponent=new org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent();      
+                                }
+                                
+                                if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
+                                {
+                                      for(var m=0;m&lt;temp_e_er_er.Observation.Values.length;m++)
+                                      {
+                                            var reactionlist=GetCodingList(temp_e_er_er.Observation.Values[m].CD);
+                                            if(reactionlist!=undefined)
+                                            {
+                                                  reactioncomponent.addManifestation(new CodeableConcept().setCoding(reactionlist));
+                                            }
+                                      }//endlogic to check for multiple reactions
+
+                                      //loop for 3 level Entry relationship
+                                      for(var _a_oe3=0;_a_oe3&lt;temp_e_er_er.Observation.EntryRelationships.length;_a_oe3++)
+                                      {
+                                            var temp_er3=temp_e_er_er.Observation.EntryRelationships[_a_oe3];
+
+                                            //severity
+                                            if(temp_er3.Observation.Code.Code==&apos;SEV&apos;)
+                                            {
+                                                  if(temp_er3.Observation.Values[0].CD.Code!=&apos;&apos;)
+                                                  {
+                                                  
+                                                        reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_er3.Observation.Values[0].CD)))
+                                                  }
+                                      
+                                            } //end of Severity
+                                      }//end of 3rd EntryRelationship
+                                }
+                          }//end of reaction
+                          
+                          //Severity
+                          if(temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
+                          {
+                                
+                                reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_e_er_er.Observation.Values[0].CD)))
+                          }
+
+                          reaction.push(reactioncomponent)
+                    }//end of MFST
+                }
+
+                
+               
+
+               
             }
 
             
-            if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos; || temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
-            {
-
-                  
-                  //Reaction
-                  if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
-                  {
-                        //logic to check for multiple reactions  
-                        
-                        if(temp_e_er_er.TypeCode.Name==&apos;MFST&apos;)
-                        {
-                              var reactioncomponent=new org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent();      
-                        }
-                        
-                        if(temp_e_er_er.Observation.Code.Code==&apos;ASSERTION&apos; || temp_e_er_er.Observation.Code.Code==&apos;&apos;)
-                        {
-                              for(var m=0;m&lt;temp_e_er_er.Observation.Values.length;m++)
-                              {
-                                    var reactionlist=GetMergedCodeList(temp_e_er_er.Observation.Values[m].CD);
-                                    if(reactionlist.length&gt;0)
-                                    {
-                                          reactioncomponent.addManifestation(CodeableConcept(GetCoding(reactionlist[0])));
-                                    }
-                              }//endlogic to check for multiple reactions
-
-                              //loop for 3 level Entry relationship
-                              for(var _a_oe3=0;_a_oe3&lt;temp_e_er_er.Observation.EntryRelationships.length;_a_oe3++)
-                              {
-                                    var temp_er3=temp_e_er_er.Observation.EntryRelationships[_a_oe3];
-
-                                    //severity
-                                    if(temp_er3.Observation.Code.Code==&apos;SEV&apos;)
-                                    {
-                                          if(temp_er3.Observation.Values[0].CD.Code!=&apos;&apos;)
-                                          {
-                                          
-                                                reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_er3.Observation.Values[0].CD)))
-                                          }
-                              
-                                    } //end of Severity
-                              }//end of 3rd EntryRelationship
-                        }
-                  }//end of reaction
-                  
-                  //Severity
-                  if(temp_e_er_er.Observation.Code.Code==&apos;SEV&apos;)
-                  {
-                        
-                        reactioncomponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.valueOf(MapAllergySeverity(temp_e_er_er.Observation.Values[0].CD)))
-                  }
-
-                  reaction.push(reactioncomponent)
-            }//end of MFST
+            
            
       }//end of _a_oe_oe 
 
@@ -206,10 +228,20 @@ function AllergyIntoleranceResource(arg1,txt,patientid)
 
 
       }//end onEntryRelationship.Observation
+
+
+        if(temp_e_er.hasOwnProperty(&apos;Encounter&apos;))
+        {
+            if(temp_e_er.Encounter.Ids[0].Extension!=&apos;&apos;)
+            {
+                allergyresource.setEncounter(new Reference().setIdentifier(new Identifier().setValue(temp_e_er.Encounter.Ids[0].Extension).setSystem(GetSystem(temp_e_er.Encounter.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+            }
+        }
    }//end of Act.EntryRelationship
 
    allergyresource.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(allergyresource))));
    //var oAllergy=JSON.parse(parser.encodeResourceToString(allergyresource));
+   //logger.info(&apos;AllergyIntolerance&apos;+parser.encodeResourceToString(allergyresource))
 
    return allergyresource;
 
