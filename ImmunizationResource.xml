@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>160024f7-3c07-446b-b49e-c682becff8ca</id>
   <name>ImmunizationResource</name>
-  <revision>18</revision>
+  <revision>21</revision>
   <lastModified>
-    <time>1670674077055</time>
+    <time>1675707074328</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -49,9 +49,13 @@ function ImmunizationResource(arg1,txt,patientid)
     immunization.setPatient(new Reference().setReference(patientid));  
 
     var tempdate=GetEffectiveTimeInfo(arg1);
-    immunization.setOccurrence(new DateTimeType(formatdate(tempdate.startdatetime)))
+    if(tempdate.startdatetime!=&apos;&apos;)
+    {
+        immunization.setOccurrence(new DateTimeType(formatdate(tempdate.startdatetime)))    
+    }
     
-    if(arg1.Authors[0].Time.Value!=&apos;&apos;)
+    
+    if(arg1.Authors[0].Time.Value.trim()!=&apos;&apos;)
     {
         immunization.setRecordedElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
     }
@@ -71,19 +75,30 @@ function ImmunizationResource(arg1,txt,patientid)
     
     if(arg1.ApproachSiteCodes!=null)
     {
-        immunization.setSite(new CodeableConcept().setCoding(GetCodingList(arg1.ApproachSiteCodes)))    
+        var sitelist=GetCodingList(arg1.ApproachSiteCodes);
+        if(sitelist!=undefined)
+        {
+            immunization.setSite(new CodeableConcept().setCoding(sitelist))        
+        }
+        
     }
 
     if(arg1.RouteCode!=null)
     {
-        immunization.setRoute(new CodeableConcept().setCoding(GetCodingList(arg1.RouteCode)))    
+        var routelist=GetCodingList(arg1.RouteCode);
+        if(routelist!=undefined)
+        {
+            immunization.setRoute(new CodeableConcept().setCoding(routelist)); 
+        }
+        
     }
 
     if(arg1.hasOwnProperty(&apos;AdministrationCode&apos;))
     {
-        if(arg1.AdministrationCode.Code!=&apos;&apos; || arg1.AdministrationCode.DisplayName!=&apos;&apos;)
+        var routelist=GetCodingList(arg1.AdministrationCode);
+        if(routelist!=undefined)
         {
-            immunization.setRoute(new CodeableConcept().setCoding(GetCodingList(arg1.AdministrationCode)));   
+            immunization.setRoute(new CodeableConcept().setCoding(routelist));   
         }
     }
 
@@ -212,12 +227,22 @@ function ImmunizationResource(arg1,txt,patientid)
         {
             if(er1.TypeCode.Name==&apos;RSON&apos; &amp;&amp; er1.Observation.TemplateIds==&apos;2.16.840.1.113883.10.20.22.4.19&apos;)
             {
-                immunization.addReasonCode(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Values[0].CD)));
+                var reasonlist=GetCodingList(er1.Observation.Values[0].CD);
+                if(reasonlist!=undefined)
+                {
+                    immunization.addReasonCode(new CodeableConcept().setCoding(reasonlist));    
+                }
+                
             }
 
             if(er1.TypeCode.Name==&apos;RSON&apos; &amp;&amp; er1.Observation.TemplateIds==&apos;2.16.840.1.113883.10.20.22.4.53&apos;)
             {
-                immunization.setStatusReason(new CodeableConcept().setCoding(GetCodingList(er1.Observation.Code)));
+                var statusreasonlist=GetCodingList(er1.Observation.Code);
+                if(statusreasonlist!=undefined)
+                {
+                    immunization.setStatusReason(new CodeableConcept().setCoding(statusreasonlist));    
+                }
+                
             }
 
             if(er1.TypeCode.Name==&apos;CAUS&apos;)
@@ -238,13 +263,13 @@ function ImmunizationResource(arg1,txt,patientid)
         {
             if(er1.Act.Text.Text!=&apos;&apos;)
             {
-                immunization.addNote(new Annotation().setText(er1.Act.Text.Text.trim()))
+                immunization.addNote(new Annotation().setText(jsonencode(er1.Act.Text.Text.trim())));
             }
             else if(er1.Act.Text.hasOwnProperty(&apos;Reference&apos;))
             {
-                if(er1.Act.Text.Reference.TEL_URL.Value!=&apos;&apos;)
+                if(er1.Act.Text.Reference.TEL_URL.Value.trim()!=&apos;&apos;)
                 {
-                    immunization.addNote(new Annotation().setText(er1.Act.Text.Reference.TEL_URL.Value.trim()))
+                    immunization.addNote(new Annotation().setText(jsonencode(er1.Act.Text.Reference.TEL_URL.Value.trim())));
                 }
             }
         }

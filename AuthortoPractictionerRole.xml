@@ -1,0 +1,103 @@
+<codeTemplate version="3.12.0">
+  <id>c3de3726-322a-4812-b350-04a667842ec8</id>
+  <name>AuthortoPractictionerRole</name>
+  <revision>26</revision>
+  <lastModified>
+    <time>1675702442072</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function AuthortoPractictionerRole(arg1)
+{
+    //takes Authors[0].AssignedAuthor node as input
+    //logger.info(&apos;AuthortoPractictionerRole:AuthortoPractictioner-&gt;&apos;+JSON.stringify(arg1))
+
+    importPackage(org.hl7.fhir.r4.model);
+        var ctx = Packages.ca.uhn.fhir.context.FhirContext.forR4();
+        var parser = ctx.newJsonParser();
+
+    var practitionerrole = new org.hl7.fhir.r4.model.PractitionerRole();
+
+    for (var _id = 0; _id &lt; arg1.Ids.length; _id++) 
+    {
+        if(arg1.Ids[_id].Extension!=&apos;&apos;)
+        {
+            practitionerrole.addIdentifier().setSystem(GetSystem(arg1.Ids[_id].Root)).setValue(arg1.Ids[_id].Extension);   
+        }
+    }
+
+    if(arg1.hasOwnProperty(&apos;Code&apos;))
+    {
+        if(arg1.Code.Code!=&apos;&apos;)
+        {
+            practitionerrole.addCode(new CodeableConcept().setCoding(GetCodingList(arg1.Code)));  
+        }    
+    }
+    
+    
+    //logger.info(&apos;AuthortoPractictionerRole:AuthortoPractictioner-&gt;&apos;+AuthortoPractictioner(arg1))
+    if(AuthortoPractictioner(arg1)!= undefined)
+    {
+        
+        //practitionerrole.setPractitioner(new Reference((AuthortoPractictioner(arg1))));   
+        practitionerrole.setPractitioner(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoPractictioner(arg1).getId())));
+    }
+
+    if(arg1.hasOwnProperty(&apos;Organization&apos;))
+    {
+        if(AuthortoOrganization(arg1.Organization)!= undefined)
+        {
+        
+            practitionerrole.setOrganization(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoOrganization(arg1.Organization).getId())));
+        }   
+    }
+    else if(arg1.hasOwnProperty(&apos;Organizations&apos;))
+    {
+        if(AuthortoOrganization(arg1.Organizations[0])!= undefined)
+        {
+        
+            practitionerrole.setOrganization(new Reference().setReference(&apos;#&apos;+new Resource(AuthortoOrganization(arg1.Organizations[0]).getId())));
+        }   
+    }
+
+
+    var specialtylist=GetMergedCodeList(arg1.Code);
+    //logger.info(&apos;AuthortoPractictionerRole-&gt;&apos;+JSON.stringify(specialtylist));
+    for(var _s=0;_s&lt;specialtylist.length;_s++)
+    {
+        practitionerrole.addSpecialty(CodeableConcept(GetCoding(specialtylist[_s])));
+    }
+    
+    
+
+    practitionerrole.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(practitionerrole))));
+     
+    //logger.info(&apos;AuthortoPractictionerRole-&gt;&apos;+countkey(parser.encodeResourceToString(practitionerrole)))
+    //logger.info(&apos;AuthortoPractictionerRole-&gt;&apos;+parser.encodeResourceToString(practitionerrole))
+    if(countkey(parser.encodeResourceToString(practitionerrole))&gt;2)
+    {
+        return practitionerrole
+    }
+    
+    
+
+}</code>
+  </properties>
+</codeTemplate>

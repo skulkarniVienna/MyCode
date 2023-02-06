@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>d0b0f04e-5478-4e70-988b-00e67434834a</id>
   <name>ConditionResource</name>
-  <revision>36</revision>
+  <revision>39</revision>
   <lastModified>
-    <time>1671644618775</time>
+    <time>1675707997707</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
       <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>SOURCE_RECEIVER</contextType>
-      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -60,33 +60,33 @@ function ConditionResource(arg1,txt,patientid)
 
     if(arg1.hasOwnProperty(&apos;Authors&apos;))
     {
-    	if(arg1.Authors[0].Time.Value!=&apos;&apos;)
-	   	{
-	    	condition.setRecordedDateElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
-	   	}
-	    
-	    /Author Block Start/
-	   	var temprecorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
-	   	if(temprecorder!= undefined)
-	   	{
-	    	condition.addContained(temprecorder);    
-	      	condition.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
-	   	}
+        if(arg1.Authors[0].Time.Value!=&apos;&apos;)
+        {
+            condition.setRecordedDateElement(new DateTimeType(formatdate(arg1.Authors[0].Time.Value)))
+        }
+        
+        /Author Block Start/
+        var temprecorder=AuthortoPractictionerRole(arg1.Authors[0].AssignedAuthor);
+        if(temprecorder!= undefined)
+        {
+            condition.addContained(temprecorder);    
+            condition.setRecorder(new Reference().setReference(&apos;#&apos;+new Resource(temprecorder.getId())));
+        }
 
 
-	   	var temprecorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor);
-	   	if(temprecorderperson!= undefined)
-	   	{
-	    	condition.addContained(temprecorderperson);
-	   	}
-	           
-	    var temprecorderorg= AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
-	   	if(temprecorderorg!= undefined)
-	   	{
-	    	condition.addContained(temprecorderorg);
-	   	}
+        var temprecorderperson=AuthortoPractictioner(arg1.Authors[0].AssignedAuthor);
+        if(temprecorderperson!= undefined)
+        {
+            condition.addContained(temprecorderperson);
+        }
+               
+        var temprecorderorg= AuthortoOrganization(arg1.Authors[0].AssignedAuthor.Organization);
+        if(temprecorderorg!= undefined)
+        {
+            condition.addContained(temprecorderorg);
+        }
 
-	   /Author Block End/	
+       /Author Block End/   
     }
     
     
@@ -107,7 +107,7 @@ function ConditionResource(arg1,txt,patientid)
             
             }
             
-        	if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
+            if(txt!=&apos;&apos; &amp;&amp; GetNarrative(txt)!=null)
             {
                 condition.setText(GetNarrative(txt))
             }
@@ -152,7 +152,7 @@ function ConditionResource(arg1,txt,patientid)
                     if(temp_er_er.Observation.Code.Code==&apos;33999-4&apos; &amp;&amp; encdate.enddatetime==&apos;&apos;)
                     {
                         condition.setClinicalStatus(new CodeableConcept().setCoding(GetMappedCodingList(temp_er_er.Observation.Values[0].CD,MapConditionClinicalStatus)));
-                  	}//end of clinicalstatus
+                    }//end of clinicalstatus
         
         
                     // age at onset
@@ -176,8 +176,23 @@ function ConditionResource(arg1,txt,patientid)
                         }
                     }//end of severity
                 }// end of temp_er_er.hasOwnProperty(&apos;Observation&apos;)
+
+
             }//end of temp_er_er for loop
         }//end of if loop 
+
+        if(temp_er.hasOwnProperty(&apos;encounter&apos;))
+        {
+            if(temp_er.TypeCode.Name==&apos;SUBJ&apos;)
+            {
+                if(temp_er.encounter.Ids[0].Extension!=&apos;&apos;)
+                {
+                    condition.setEncounter(new Reference().setIdentifier(new Identifier().setValue(temp_er.encounter.Ids[0].Extension).setSystem(GetSystem(temp_er.encounter.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+                }
+                        
+            }
+        }
+
     }//end of _per
 
     condition.setId(hex_sha256(JSON.stringify(parser.encodeResourceToString(condition))));

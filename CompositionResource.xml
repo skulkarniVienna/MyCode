@@ -1,18 +1,18 @@
 <codeTemplate version="3.12.0">
   <id>caf126fc-1371-4852-a025-d87595c7fbc1</id>
   <name>CompositionResource</name>
-  <revision>19</revision>
+  <revision>34</revision>
   <lastModified>
-    <time>1671799865941</time>
+    <time>1675706742604</time>
     <timezone>Asia/Calcutta</timezone>
   </lastModified>
   <contextSet>
     <delegate>
-      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
-      <contextType>SOURCE_RECEIVER</contextType>
-      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
       <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
     </delegate>
   </contextSet>
   <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
@@ -62,6 +62,7 @@
         composition.setCustodian(new Reference().setReference(&apos;#&apos;+new Resource(tempcustodian.getId())))
     }
 
+    /*
     if(arg1.DocumentationOfs.length&gt;0)
     {
         if(arg1.DocumentationOfs[0].ServiceEvent.IVL_TS.Low.TS.Value!=&apos;&apos;)
@@ -78,7 +79,9 @@
             
         }
     }
-   
+    */
+
+
     for(var _a=0;_a&lt;arg1.Authors.length;_a++)
     {
         var tempauthor=arg1.Authors[_a];
@@ -106,6 +109,147 @@
         /Author Block End/
 
     }
+
+    var attesterlist=[];
+    if(arg1.hasOwnProperty(&apos;LegalAuthenticator&apos;))
+    {
+        var lauthor=AuthortoPractictionerRole(arg1.LegalAuthenticator.AssignedEntity);
+        if(lauthor!= undefined)
+        {
+            var attester=new org.hl7.fhir.r4.model.Composition.CompositionAttesterComponent();
+            attester.setMode(Composition.CompositionAttestationMode.LEGAL);
+
+            if(arg1.LegalAuthenticator.hasOwnProperty(&apos;Time&apos;))
+            {
+                if(arg1.LegalAuthenticator.Time.Value!=&apos;&apos;)
+                {
+                    attester.setTimeElement(new DateTimeType(formatdate(arg1.LegalAuthenticator.Time.Value)))    
+                }    
+            }
+            
+            composition.addContained(lauthor);    
+            attester.setParty(new Reference().setReference(&apos;#&apos;+new Resource(lauthor.getId())));
+            attesterlist.push(attester)
+
+        }
+
+        var lauthorperson=AuthortoPractictioner(arg1.LegalAuthenticator.AssignedEntity);
+        if(lauthorperson!= undefined)
+        {
+            composition.addContained(lauthorperson);
+        }
+                 
+        var lauthorg=AuthortoOrganization(arg1.LegalAuthenticator.AssignedEntity.Organizations[0]);
+        if(lauthorg!= undefined)
+        {
+            composition.addContained(lauthorg);
+        }
+    }
+
+    if(arg1.hasOwnProperty(&apos;Authenticators&apos;))
+    {
+        for(var _au=0;_au&lt;arg1.Authenticators.length;_au++)
+        {
+            var tempauthenticator=arg1.Authenticators[_au];
+            var lauthor=AuthortoPractictionerRole(tempauthenticator.AssignedEntity);
+            if(lauthor!= undefined)
+            {
+                var attester=new org.hl7.fhir.r4.model.Composition.CompositionAttesterComponent();
+                attester.setMode(Composition.CompositionAttestationMode.PROFESSIONAL);
+
+                if(arg1.Authenticators.hasOwnProperty(&apos;Time&apos;))
+                {
+                    if(tempauthenticator.Time.Value!=&apos;&apos;)
+                    {
+                        attester.setTimeElement(new DateTimeType(formatdate(tempauthenticator.Time.Value)))    
+                    }    
+                }
+                
+                composition.addContained(lauthor);    
+                attester.setParty(new Reference().setReference(&apos;#&apos;+new Resource(lauthor.getId())));
+                attesterlist.push(attester)
+
+            }
+
+            var lauthorperson=AuthortoPractictioner(tempauthenticator.AssignedEntity);
+            if(lauthorperson!= undefined)
+            {
+                composition.addContained(lauthorperson);
+            }
+                     
+            var lauthorg=AuthortoOrganization(tempauthenticator.AssignedEntity.Organizations[0]);
+            if(lauthorg!= undefined)
+            {
+                composition.addContained(lauthorg);
+            }    
+        }
+        
+    }
+
+
+
+    if(attesterlist.length&gt;0)
+    {
+        composition.setAttester(attesterlist);
+    }
+
+
+    var eventlist=[];
+    if(arg1.hasOwnProperty(&apos;Component1&apos;))
+    {
+        var tempenc=arg1.Component1.EncompassingEncounter;
+
+        if(tempenc.EffectiveTime.Low.TS.Value!=&apos;&apos;)
+        {
+            var event=new org.hl7.fhir.r4.model.Composition.CompositionEventComponent();
+
+            var tempdate=GetEffectiveTimeInfo(tempenc);
+            event.setPeriod(GetPeriod(tempdate));
+            event.addDetail(new Reference().setIdentifier(new Identifier().setValue(tempenc.Ids[0].Extension).setSystem(GetSystem(tempenc.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+
+            
+            if(tempenc.Location.HealthCareFacility.Ids[0].Extension!=&apos;&apos;)
+            {
+                event.addDetail(new Reference().setIdentifier(new Identifier().setValue(tempenc.Location.HealthCareFacility.Ids[0].Extension).setSystem(GetSystem(tempenc.Location.HealthCareFacility.Ids[0].Root))).setType(&apos;Location&apos;));                        
+            }
+            
+
+            eventlist.push(event);
+
+        }
+
+
+        
+    }
+    
+    if(arg1.hasOwnProperty(&apos;DocumentationOfs&apos;))
+    {
+
+        for(var _d=0;_d&lt;arg1.DocumentationOfs.length;_d++)
+        {
+            var tempdoc=arg1.DocumentationOfs[_d].ServiceEvent;
+
+            if(tempdoc.IVL_TS.Low.TS.Value!=&apos;&apos;)
+            {
+                var event=new org.hl7.fhir.r4.model.Composition.CompositionEventComponent();
+
+                var tempdate=GetEffectiveTimeInfo(tempdoc);
+                event.setPeriod(GetPeriod(tempdate));
+                event.addDetail(new Reference().setIdentifier(new Identifier().setValue(tempdoc.Ids[0].Extension).setSystem(GetSystem(tempdoc.Ids[0].Root))).setType(&apos;Encounter&apos;));    
+
+                eventlist.push(event);
+
+            }
+
+
+        }
+    }
+
+    if(eventlist.length&gt;0)
+    {
+        composition.setEvent(eventlist);
+    }
+
 
     var oComposition=JSON.parse(parser.encodeResourceToString(composition));
 

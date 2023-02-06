@@ -1,0 +1,50 @@
+<codeTemplate version="3.12.0">
+  <id>fb2dd29e-94f4-4072-b1c0-c71eefa2aa61</id>
+  <name>GetPeriod</name>
+  <revision>1</revision>
+  <lastModified>
+    <time>1675705408917</time>
+    <timezone>Asia/Calcutta</timezone>
+  </lastModified>
+  <contextSet>
+    <delegate>
+      <contextType>DESTINATION_FILTER_TRANSFORMER</contextType>
+      <contextType>DESTINATION_DISPATCHER</contextType>
+      <contextType>SOURCE_FILTER_TRANSFORMER</contextType>
+      <contextType>SOURCE_RECEIVER</contextType>
+      <contextType>DESTINATION_RESPONSE_TRANSFORMER</contextType>
+    </delegate>
+  </contextSet>
+  <properties class="com.mirth.connect.model.codetemplates.BasicCodeTemplateProperties">
+    <type>FUNCTION</type>
+    <code>/**
+    Modify the description here. Modify the function name and parameters as needed. One function per
+    template is recommended; create a new code template for each new function.
+
+    @param {String} arg1 - arg1 description
+    @return {String} return description
+*/
+function GetPeriod(arg1)
+{
+    
+
+   if(arg1.startdatetime!=&apos;&apos;)  
+   	{
+      var period=new Period();
+      period.setStartElement(new DateTimeType(formatdate(arg1.startdatetime)));
+  	}
+
+  	if(arg1.enddatetime!=&apos;&apos;)
+  	{
+  		period.setEndElement(new DateTimeType(formatdate(arg1.enddatetime)));	
+  	}
+      
+    if(period!=undefined)
+    {
+    	return period;	
+    }  
+    
+   
+}</code>
+  </properties>
+</codeTemplate>
